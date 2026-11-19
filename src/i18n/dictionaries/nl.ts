@@ -4,9 +4,9 @@
  */
 const nl = {
   meta: {
-    title: "The Watch Cases Amsterdam – Leren horlogeboxen, door jou ontworpen",
+    title: "The Watch Cases Amsterdam – Leren horlogeboxen, vervaardigd voor uw collectie",
     description:
-      "Leren horlogeboxen voor twee of vier horloges. Jij kiest het leer, de voering en je naam in het deksel. Met de hand gemaakt na je bestelling, gecontroleerd in Amsterdam.",
+      "Leren horlogeboxen voor twee of vier horloges. U kiest het leer, de voering en uw naam in het deksel. Met de hand gemaakt na uw bestelling, gecontroleerd in Amsterdam.",
   },
   a11y: {
     skipToContent: "Naar de inhoud",
@@ -25,7 +25,7 @@ const nl = {
     "Productietijd 14 werkdagen",
   ],
   nav: {
-    configure: "Ontwerp jouw box",
+    configure: "Ontwerp uw box",
     collection: "Collectie",
     duo: "Duo",
     quartetSlim: "Quartet Slim",
@@ -57,17 +57,17 @@ const nl = {
     hero: {
       titleLine1: "Vervaardigd voor",
       titleLine2: "uw collectie",
-      primary: "Ontwerp jouw horlogebox",
+      primary: "Ontwerp uw horlogebox",
       secondary: "Bekijk de collectie",
       filmLabel: "Film: de Duo en de Quartet Slim op een notenhouten bureau",
       pause: "Film pauzeren",
       play: "Film afspelen",
     },
     reassurance: {
-      label: "Wat je krijgt",
+      label: "Wat u krijgt",
       items: [
         { title: "Gravering inbegrepen", text: "Tot 12 tekens op de Duo, 18 op de Quartet Slim" },
-        { title: "Gemaakt na je bestelling", text: "Productietijd 14 werkdagen" },
+        { title: "Gemaakt na uw bestelling", text: "Productietijd 14 werkdagen" },
         { title: "Verzending in NL, BE en DE", text: "Nederland, België en Duitsland" },
         { title: "Eén jaar garantie", text: "Op stiksels, rits en beslag" },
       ],
@@ -75,19 +75,19 @@ const nl = {
     intro: {
       titleLine1: "Ontdek de",
       titleLine2: "collectie",
-      text: "Twee leren horlogeboxen: de Duo voor twee horloges en de Quartet Slim voor vier. Jij kiest het leer aan de buitenkant, de suède binnenin en de kussens, en wij drukken jouw naam in het deksel. Elke box wordt na je bestelling met de hand gesneden en gestikt, en in Amsterdam tegen jouw ontwerp gecontroleerd voordat hij naar je toe komt.",
-      link: "Vind jouw box",
+      text: "Twee leren horlogeboxen: de Duo voor twee horloges en de Quartet Slim voor vier. U kiest het leer aan de buitenkant, de suède binnenin en de kussens, en wij drukken uw naam in het deksel. Elke box wordt na uw bestelling met de hand gesneden en gestikt, en in Amsterdam tegen uw ontwerp gecontroleerd voordat hij naar u toe komt.",
+      link: "Vind uw box",
     },
     subnav: {
       label: "Horlogeboxen",
       all: "Alles",
-      cta: "Ontwerp de jouwe",
+      cta: "Ontwerp de uwe",
     },
     bands: {
       from: "Vanaf {price}, gravering inbegrepen",
       more: "Ontdek meer",
       duo: {
-        subtitle: "Twee horloges, jouw naam erin",
+        subtitle: "Twee horloges, uw naam erin",
         alt: "Duo horlogebox in navy leer, open, met beige suède binnenin en de initialen A.V. in het deksel",
       },
       quartetSlim: {
@@ -97,28 +97,28 @@ const nl = {
     },
     configurator: {
       eyebrow: "De configurator",
-      title: "Drie keuzes, dan jouw naam",
-      text: "Kies het leer aan de buitenkant, de suède binnenin en de kussens. Draai de box rond terwijl je kiest en zie je eigen exemplaar, geen stockfoto.",
+      title: "Drie keuzes, dan uw naam",
+      text: "Kies het leer aan de buitenkant, de suède binnenin en de kussens. Draai de box rond terwijl u kiest en zie uw eigen exemplaar, geen stockfoto.",
       steps: [
         { title: "Buitenkant", text: "Volnerf leer, van navy tot cognac" },
         { title: "Binnenkant", text: "Suède voering, bijpassend of juist niet" },
-        { title: "Kussens", text: "Suède of nappa, in de kleur die jij kiest" },
-        { title: "Jouw naam", text: "In het deksel gedrukt, altijd inbegrepen" },
+        { title: "Kussens", text: "Suède of nappa, in de kleur die u kiest" },
+        { title: "Uw naam", text: "In het deksel gedrukt, altijd inbegrepen" },
       ],
       cta: "Open de configurator",
-      note: "Geen account nodig. Je ontwerp wordt bewaard in de link.",
+      note: "Geen account nodig. Uw ontwerp wordt bewaard in de link.",
     },
     designs: {
       title: "Kant-en-klare ontwerpen",
       seeAll: "Bekijk alle ontwerpen",
     },
     process: {
-      title: "Van jouw scherm naar jouw bureau",
+      title: "Van uw scherm naar uw bureau",
       steps: [
-        { title: "Jij ontwerpt hem", text: "Leer, voering, kussens en de naam voor het deksel." },
-        { title: "Wij sturen een proef", text: "Een render van jouw exacte box en de gravering, om per e-mail goed te keuren." },
-        { title: "Hij wordt gesneden en gestikt", text: "Met de hand, van volnerf leer, alleen voor jouw ontwerp." },
-        { title: "Gecontroleerd in Amsterdam", text: "Letter voor letter tegen jouw ontwerp, daarna naar je verstuurd." },
+        { title: "U ontwerpt hem", text: "Leer, voering, kussens en de naam voor het deksel." },
+        { title: "Wij sturen een proef", text: "Een render van uw exacte box en de gravering, om per e-mail goed te keuren." },
+        { title: "Hij wordt gesneden en gestikt", text: "Met de hand, van volnerf leer, alleen voor uw ontwerp." },
+        { title: "Gecontroleerd in Amsterdam", text: "Letter voor letter tegen uw ontwerp, daarna naar u verstuurd." },
       ],
       link: "Lees hoe het gemaakt wordt",
       alt: "De Duo en de Quartet Slim open naast elkaar op een notenhouten bureau",
@@ -133,13 +133,13 @@ const nl = {
       },
       business: {
         title: "Zakelijke cadeaus",
-        text: "Jouw logo op het deksel en jouw kleuren binnenin. Vertel ons het aantal en de deadline, dan sturen we je een offerte.",
+        text: "Uw logo op het deksel en uw kleuren binnenin. Vertel ons het aantal en de deadline, dan sturen wij u een offerte.",
         link: "Vraag een offerte aan",
         alt: "Een gesloten zwarte Quartet Slim horlogebox op een notenhouten bureau",
       },
       jewellers: {
-        title: "Bij jouw juwelier",
-        text: "Voel eerst het leer en de stiksels. Scan de kaart op de display en je juwelier blijft betrokken bij je bestelling.",
+        title: "Bij uw juwelier",
+        text: "Voel eerst het leer en de stiksels. Scan de kaart op de display en uw juwelier blijft betrokken bij uw bestelling.",
         link: "Voor juweliers",
         alt: "Een open Duo horlogebox op een notenhouten bureau, van opzij gezien",
       },
@@ -148,10 +148,10 @@ const nl = {
       title: "Nu en dan nieuw leer",
       text: "Een korte e-mail als er een leersoort bijkomt of een partij bijna op is. Verder niets.",
       label: "E-mailadres",
-      placeholder: "jij@voorbeeld.nl",
+      placeholder: "naam@voorbeeld.nl",
       submit: "Aanmelden",
       invalid: "Vul een geldig e-mailadres in.",
-      notReady: "De nieuwsbrief start bij de lancering. Je aanmelding is nog niet opgeslagen.",
+      notReady: "De nieuwsbrief start bij de lancering. Uw aanmelding is nog niet opgeslagen.",
     },
   },
 } as const;
