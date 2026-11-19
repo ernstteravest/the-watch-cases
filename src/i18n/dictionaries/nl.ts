@@ -55,8 +55,8 @@ const nl = {
   },
   home: {
     hero: {
-      titleLine1: "Door jou ontworpen,",
-      titleLine2: "voor jou gemaakt",
+      titleLine1: "Gemaakt voor",
+      titleLine2: "jouw collectie",
       primary: "Ontwerp jouw horlogebox",
       secondary: "Bekijk de collectie",
       filmLabel: "Film: de Duo en de Quartet Slim op een notenhouten bureau",

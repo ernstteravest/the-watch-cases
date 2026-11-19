@@ -67,7 +67,7 @@ export default async function StyleguidePage({ params }: PageProps<"/[lang]/styl
 
       <Block title="Typography — Archivo" tone="sand">
         <div className="flex flex-col gap-8">
-          <p className="text-display font-bold">Designed by you, made for you</p>
+          <p className="text-display font-bold">Crafted for your collection</p>
           <p className="text-h1 font-bold text-accent">Explore the collection</p>
           <p className="text-h2 font-bold">Three choices, then your name</p>
           <p className="text-h3 font-bold">New leathers, now and then</p>

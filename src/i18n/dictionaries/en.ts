@@ -53,8 +53,8 @@ const en: Dictionary = {
   },
   home: {
     hero: {
-      titleLine1: "Designed by you,",
-      titleLine2: "made for you",
+      titleLine1: "Crafted for",
+      titleLine2: "your collection",
       primary: "Design your watch box",
       secondary: "See the collection",
       filmLabel: "Film: the Duo and the Quartet Slim watch boxes on a walnut desk",
