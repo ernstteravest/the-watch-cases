@@ -418,6 +418,33 @@ export const withEngravingArea = (
   return { ...layout, engraving };
 };
 
+/**
+ * Where the exterior logo goes: the middle of the outside of the lid (the
+ * "lid-top" surface), centred, reading left to right seen from the front.
+ * Throws a DimensionError if the area doesn't fit inside the lid's rounded top edge.
+ */
+export const logoAnchor = (layout: BoxLayout, area: { widthCm: number; heightCm: number }): EngravingAnchor => {
+  const top = layout.engraving["lid-top"];
+  if (area.widthCm > top.maxWidthCm + EPS || area.heightCm > top.maxHeightCm + EPS) {
+    throw new DimensionError([
+      {
+        path: "logo",
+        code: "logo_area_too_large",
+        message: `Logo area ${area.widthCm} × ${area.heightCm} cm does not fit the top of the lid (max ${fmt(top.maxWidthCm)} × ${fmt(top.maxHeightCm)} cm).`,
+      },
+    ]);
+  }
+  return { ...top, widthCm: area.widthCm, heightCm: area.heightCm };
+};
+
+/** Size of a logo with the given aspect ratio (width / height), fitted inside its area. */
+export const fitLogo = (area: { widthCm: number; heightCm: number }, aspect: number): { widthCm: number; heightCm: number } => {
+  if (!Number.isFinite(aspect) || aspect <= 0) return { widthCm: area.widthCm, heightCm: area.heightCm };
+  return aspect >= area.widthCm / area.heightCm
+    ? { widthCm: area.widthCm, heightCm: area.widthCm / aspect }
+    : { widthCm: area.heightCm * aspect, heightCm: area.heightCm };
+};
+
 /** True if x lies above any compartment (i.e. above a watch crystal). */
 export const isAboveCompartment = (layout: BoxLayout, x: number, halfWidth = 0): boolean =>
   layout.base.compartments.some((c) => x + halfWidth > c.minX + EPS && x - halfWidth < c.maxX - EPS);

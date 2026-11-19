@@ -29,8 +29,18 @@ export type AssetFailurePolicy = "fail" | "fallback";
 
 export const assetFailurePolicy = (isRendering: boolean): AssetFailurePolicy => (isRendering ? "fail" : "fallback");
 
-/** Resolves a path inside public/ for Remotion Studio, renders and the configurator app alike. */
-export const publicUrl = (path: string): string => staticFile(path);
+/**
+ * Resolves a path inside public/ for Remotion Studio, renders and the configurator app alike.
+ * Outside Remotion (the configurator page, including the hosted preview served from a
+ * sub-path) files are resolved against the page URL instead of the site root.
+ */
+export const publicUrl = (path: string): string => {
+  const w = typeof window === "undefined" ? undefined : (window as Window & { remotion_staticBase?: string });
+  if (w && !w.remotion_staticBase && typeof document !== "undefined") {
+    return new URL(path.replace(/^\/+/, ""), document.baseURI).href;
+  }
+  return staticFile(path);
+};
 
 type FontRules = PersonalizationRules["font"];
 
@@ -52,7 +62,11 @@ export const loadEngravingFont = (font: FontRules, resolve: (path: string) => st
     font.files.map(async (file) => {
       const url = resolve(file.path);
       try {
-        const face = new FontFace(font.family, `url("${url}") format("woff2")`, {
+        // Fetched explicitly so an HTTP failure surfaces as a clear error.
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.arrayBuffer();
+        const face = new FontFace(font.family, data, {
           weight: String(font.weight),
           ...(file.unicodeRange ? { unicodeRange: file.unicodeRange } : {}),
         });

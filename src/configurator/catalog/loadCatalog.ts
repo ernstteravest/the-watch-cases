@@ -9,6 +9,7 @@ import {
   DimensionError,
   ENGRAVING_PLACEMENTS,
   isEngravingPlacement,
+  logoAnchor,
   validateConstruction,
   validateDimensions,
   withEngravingArea,
@@ -50,6 +51,8 @@ export const loadCatalog = (raw: unknown): Result<Catalog> => {
     [catalog.products.map((p) => p.id), "products"],
     [catalog.pieces.map((p) => p.id), "pieces"],
     [catalog.presentation.views.map((v) => v.id), "presentation.views"],
+    [catalog.logo.modes.map((m) => m.id), "logo.modes"],
+    [catalog.logo.colors.map((c) => c.id), "logo.colors"],
   ] as const) {
     for (const dup of new Set(findDuplicates([...list]))) {
       add(name, "duplicate_id", `Duplicate id "${dup}" in ${name}.`);
@@ -79,19 +82,23 @@ export const loadCatalog = (raw: unknown): Result<Catalog> => {
     ];
     issues.push(...dimIssues);
     if (dimIssues.length === 0) {
-      try {
+      const layout = computeBoxLayout(product.dimensions, catalog.construction);
+      const check = (path: string, fn: () => unknown) => {
+        try {
+          fn();
+        } catch (e) {
+          if (!(e instanceof DimensionError)) throw e;
+          e.issues.forEach((issue) => add(path, issue.code, issue.message));
+        }
+      };
+      check(`products.${i}.engraving`, () =>
         withEngravingArea(
-          computeBoxLayout(product.dimensions, catalog.construction),
+          layout,
           { widthCm: product.engraving.widthCm, heightCm: product.engraving.heightCm },
           catalog.personalization.placements.map((p) => p.id),
-        );
-      } catch (e) {
-        if (e instanceof DimensionError) {
-          e.issues.forEach((issue) => add(`products.${i}.engraving`, issue.code, issue.message));
-        } else {
-          throw e;
-        }
-      }
+        ),
+      );
+      check(`products.${i}.logo`, () => logoAnchor(layout, product.logo));
     }
     if (product.engraving.maxLength !== undefined && product.engraving.maxLength < catalog.personalization.minLength) {
       add(`products.${i}.engraving.maxLength`, "invalid_length", "Product maxLength is smaller than personalization.minLength.");
@@ -185,9 +192,14 @@ export const loadCatalog = (raw: unknown): Result<Catalog> => {
     add("personalization.defaultPlacement", "unknown_placement", `Unknown placement "${rules.defaultPlacement}".`);
   }
 
+  // Logo
+  if (!catalog.logo.colors.some((c) => c.id === catalog.logo.defaultColor)) {
+    add("logo.defaultColor", "default_not_in_palette", `Default "${catalog.logo.defaultColor}" is not one of the logo colours.`);
+  }
+
   // Presentation
   const viewIds = new Set(catalog.presentation.views.map((v) => v.id));
-  for (const key of ["defaultView", "personalizationView"] as const) {
+  for (const key of ["defaultView", "personalizationView", "logoView"] as const) {
     if (!viewIds.has(catalog.presentation[key])) {
       add(`presentation.${key}`, "unknown_view", `Unknown view "${catalog.presentation[key]}".`);
     }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defaultConfiguration, getCatalog } from "@/configurator/catalog";
+import { pngDataUrl } from "@/configurator/tests/helpers";
 import { quoteOrder, type PriceList } from "./quote";
 
 const catalog = getCatalog();
@@ -64,5 +65,31 @@ describe("quoteOrder", () => {
       shipping,
     );
     expect(result.ok && result.quote.lines[0].unitPriceCents).toBe(37400);
+  });
+
+  it("needs the uploaded logo, keeps the image out of the order data and adds a logo surcharge", () => {
+    const withLogo = (artwork: { name: string; format: "png"; dataUrl: string; width: number; height: number } | null) => ({
+      ...duo(),
+      logo: { mode: "full-color" as const, artwork },
+    });
+    expect(quoteOrder(catalog, prices, [{ configuration: withLogo(null), quantity: 1 }], shipping)).toEqual({
+      ok: false,
+      error: { code: "LOGO_MISSING", line: 0 },
+    });
+
+    const artwork = { name: "acme.png", format: "png" as const, dataUrl: pngDataUrl(800, 400), width: 800, height: 400 };
+    const result = quoteOrder(
+      catalog,
+      { ...prices, options: { "*": { "logo:full-color": 1500 } } },
+      [{ configuration: withLogo(artwork), quantity: 1 }],
+      shipping,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const line = result.quote.lines[0];
+    expect(line.unitPriceCents).toBe(36400);
+    expect(line.logoArtwork).toEqual(artwork);
+    expect(line.configuration.logo?.artwork?.dataUrl).toBe("");
+    expect(line.configuration.logo?.artwork?.name).toBe("acme.png");
   });
 });

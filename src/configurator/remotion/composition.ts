@@ -19,7 +19,7 @@ export const watchBoxComposition = {
   defaultProps: (catalogResult.ok
     ? defaultRenderProps(catalogResult.value)
     : {
-        configuration: { product: "", exterior: "", interior: "", pieces: {}, personalization: { text: "", placement: "lid" } },
+        configuration: { product: "", exterior: "", interior: "", personalization: { text: "", placement: "lid" } },
         view: { preset: "open", azimuth: 0, elevation: 30, lidAngle: 0 },
       }) satisfies RenderProps,
 } as const;

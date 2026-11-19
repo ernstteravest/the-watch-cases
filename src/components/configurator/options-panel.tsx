@@ -4,25 +4,43 @@ import type { ReactNode } from "react";
 import {
   effectiveMaxLength,
   findProduct,
-  pieceColorChoices,
   surfaceSwatchHex,
   type Catalog,
   type Configuration,
+  type LogoArtwork,
 } from "@/configurator/catalog";
 import type { Labels } from "@/configurator/labels";
+import type { LogoState } from "@/configurator/logo/useLogo";
 import { cn } from "@/lib/utils";
 import { EngravingField } from "./engraving-field";
+import { LogoField, type LogoTexts } from "./logo-field";
 import { Swatches } from "./swatches";
 
 export type PanelTexts = {
   model: string;
-  leatherDetails: string;
+  interiorFollowers: string;
   personalization: string;
   nameLabel: string;
   namePlaceholder: string;
   nameHelp: string;
   rules: string;
   showLid: string;
+  logo: LogoTexts & { title: string; description: string };
+};
+
+export type LogoControls = {
+  state: LogoState;
+  artwork: LogoArtwork | null;
+  errors: string[];
+  visibleInView: boolean;
+  onModeChange: (mode: LogoState["mode"]) => void;
+  onColorChange: (color: string) => void;
+  onRemoveBackgroundChange: (remove: boolean) => void;
+  onKeepInsideChange: (keep: boolean) => void;
+  onFile: (file: File) => void;
+  onPasteWithoutImage: () => void;
+  onRemove: () => void;
+  onShowLogo: () => void;
 };
 
 function Step({ index, title, value, children }: { index: number; title: string; value?: string; children: ReactNode }) {
@@ -35,13 +53,18 @@ function Step({ index, title, value, children }: { index: number; title: string;
         <h2 id={`step-${index}`} className="text-[17px] font-semibold">
           {title}
         </h2>
-        {value && <span className="ml-auto text-[15px] text-muted">{value}</span>}
+        {value && <span className="ml-auto text-right text-[15px] text-muted">{value}</span>}
       </header>
       {children}
     </section>
   );
 }
 
+/**
+ * Steps: model, exterior, interior, engraving, logo. Leather pieces are no
+ * longer customer choices (configurator V2); the strap and snap cap follow
+ * the interior colour, which the Interior step says.
+ */
 export function OptionsPanel({
   catalog,
   configuration,
@@ -51,9 +74,11 @@ export function OptionsPanel({
   nameVisible,
   onNameChange,
   onShowLid,
+  logo,
   labels,
   texts,
   modelMeta,
+  locale,
 }: {
   catalog: Catalog;
   configuration: Configuration;
@@ -63,12 +88,21 @@ export function OptionsPanel({
   nameVisible: boolean;
   onNameChange: (value: string) => void;
   onShowLid: () => void;
+  logo: LogoControls;
   labels: Labels;
   texts: PanelTexts;
   /** Per model: capacity line and price line, already translated. */
   modelMeta: Record<string, { capacity: string; price: string }>;
+  locale: string;
 }) {
   const product = findProduct(catalog, configuration.product) ?? catalog.products[0];
+  const followers = labels.interiorFollowers();
+  const logoValue =
+    logo.state.mode === "none"
+      ? texts.logo.none
+      : logo.state.mode === "one-color"
+        ? `${texts.logo.oneColor} · ${labels.logoColor(logo.state.color)}`
+        : texts.logo.fullColor;
   let step = 0;
 
   return (
@@ -109,6 +143,9 @@ export function OptionsPanel({
           title={labels.surface(surface)}
           value={`${labels.color(configuration[surface])} · ${labels.material(catalog[surface].material)}`}
         >
+          {surface === "interior" && followers && (
+            <p className="-mt-1 text-sm text-muted">{texts.interiorFollowers.replace("{list}", followers)}</p>
+          )}
           <Swatches
             name={surface}
             label={labels.surface(surface)}
@@ -122,71 +159,6 @@ export function OptionsPanel({
           />
         </Step>
       ))}
-
-      <Step index={++step} title={texts.leatherDetails}>
-        <div className="flex flex-col gap-6">
-          {catalog.pieces.map((piece) => {
-            const choice = configuration.pieces[piece.id] ?? piece.default;
-            const choices = pieceColorChoices(catalog, configuration, piece.id);
-            const selected = choices.find((c) => c.value === choice.color);
-            const selectedLabel = selected
-              ? selected.isMatch
-                ? `${labels.match(selected.value)} (${labels.color(selected.colorId)})`
-                : labels.color(selected.colorId)
-              : "";
-            return (
-              <div key={piece.id} className="flex flex-col gap-3">
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <h3 className="text-[15px] font-semibold">{labels.piece(piece.id)}</h3>
-                  <span className="text-sm text-muted">{selectedLabel}</span>
-                </div>
-                {piece.materials.length > 1 && (
-                  <div
-                    role="radiogroup"
-                    aria-label={labels.piece(piece.id)}
-                    className="inline-flex self-start rounded-pill border border-line-strong p-0.5"
-                  >
-                    {piece.materials.map((m) => (
-                      <label
-                        key={m}
-                        className="cursor-pointer has-[:focus-visible]:rounded-pill has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent"
-                      >
-                        <input
-                          type="radio"
-                          name={`${piece.id}-material`}
-                          value={m}
-                          checked={choice.material === m}
-                          onChange={() =>
-                            onChange((c) => ({ ...c, pieces: { ...c.pieces, [piece.id]: { ...choice, material: m } } }))
-                          }
-                          className="peer sr-only"
-                        />
-                        <span className="block min-h-9 rounded-pill px-3.5 py-2 text-sm font-semibold text-body peer-checked:bg-ink peer-checked:text-paper">
-                          {labels.material(m)}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-                <Swatches
-                  name={`${piece.id}-color`}
-                  label={labels.piece(piece.id)}
-                  value={choice.color}
-                  onChange={(v) =>
-                    onChange((c) => ({ ...c, pieces: { ...c.pieces, [piece.id]: { ...choice, color: v } } }))
-                  }
-                  options={choices.map((c) => ({
-                    value: c.value,
-                    hex: c.hex,
-                    isMatch: c.isMatch,
-                    label: c.isMatch ? `${labels.match(c.value)} (${labels.color(c.colorId)})` : labels.color(c.colorId),
-                  }))}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </Step>
 
       {catalog.personalization.enabled && (
         <Step index={++step} title={texts.personalization}>
@@ -204,6 +176,32 @@ export function OptionsPanel({
               rules: texts.rules.replace("{max}", String(effectiveMaxLength(catalog.personalization, product))),
               showLid: texts.showLid,
             }}
+          />
+        </Step>
+      )}
+
+      {catalog.logo.enabled && (
+        <Step index={++step} title={texts.logo.title} value={logoValue}>
+          <p className="-mt-1 text-sm text-muted">{texts.logo.description}</p>
+          <LogoField
+            rules={catalog.logo}
+            product={product}
+            exteriorHex={surfaceSwatchHex(catalog, "exterior", configuration.exterior)}
+            state={logo.state}
+            artwork={logo.artwork}
+            errors={logo.errors}
+            visibleInView={logo.visibleInView}
+            onModeChange={logo.onModeChange}
+            onColorChange={logo.onColorChange}
+            onRemoveBackgroundChange={logo.onRemoveBackgroundChange}
+            onKeepInsideChange={logo.onKeepInsideChange}
+            onFile={logo.onFile}
+            onPasteWithoutImage={logo.onPasteWithoutImage}
+            onRemove={logo.onRemove}
+            onShowLogo={logo.onShowLogo}
+            labels={labels}
+            texts={texts.logo}
+            locale={locale}
           />
         </Step>
       )}

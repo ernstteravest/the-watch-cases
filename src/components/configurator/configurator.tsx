@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   catalogResult,
+  defaultRenderProps,
   effectiveMaxLength,
   findProduct,
   validateConfiguration,
   validatePersonalization,
+  validateRenderProps,
   type Catalog,
   type Configuration,
   type RenderProps,
@@ -14,8 +16,9 @@ import {
 import { decodeDesign, encodeDesign } from "@/configurator/design-link";
 import { isEngravingPlacement } from "@/configurator/geometry/layout";
 import { createLabels } from "@/configurator/labels";
+import { useLogo } from "@/configurator/logo/useLogo";
 import { isAnchorVisible } from "@/configurator/scene/camera";
-import { layoutFor } from "@/configurator/scene/describeScene";
+import { layoutFor, logoAnchorFor } from "@/configurator/scene/describeScene";
 import type { SceneEvent, SceneStatusApi } from "@/configurator/scene/SceneStatus";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
@@ -52,6 +55,10 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
   const [configuration, setConfiguration] = useState<Configuration>(initial.configuration);
   const [name, setName] = useState(initial.name);
   const { view, showPreset, rotateBy } = useViewState(catalog);
+  const logo = useLogo(catalog);
+  const { upload } = logo;
+  // Stable, so the paste listener isn't re-attached on every render.
+  const uploadLogo = useCallback((file: File) => void upload(file), [upload]);
   const [notices, setNotices] = useState<Record<string, SceneEvent>>({});
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
@@ -65,19 +72,33 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
     [name, catalog, product],
   );
 
-  // The preview keeps the last valid name while the customer is correcting it.
+  // The preview keeps the last valid name while the customer is correcting it,
+  // unless that name no longer fits (e.g. after switching to the shorter Duo).
   const [lastValidName, setLastValidName] = useState(() => (personalization.ok ? personalization.value : ""));
   if (personalization.ok && personalization.value !== lastValidName) setLastValidName(personalization.value);
+  else if (!personalization.ok && lastValidName && !validatePersonalization(lastValidName, catalog.personalization, product).ok) {
+    setLastValidName("");
+  }
 
+  const logoChoice = logo.choice;
   const previewConfiguration = useMemo<Configuration>(
-    () => ({ ...configuration, personalization: { ...configuration.personalization, text: lastValidName } }),
-    [configuration, lastValidName],
+    () => ({
+      ...configuration,
+      personalization: { ...configuration.personalization, text: lastValidName },
+      ...(logoChoice ? { logo: logoChoice } : {}),
+    }),
+    [configuration, lastValidName, logoChoice],
   );
   const configurationOk = useMemo(
     () => validateConfiguration(catalog, previewConfiguration).ok,
     [catalog, previewConfiguration],
   );
-  const renderProps = useMemo<RenderProps>(() => ({ configuration: previewConfiguration, view }), [previewConfiguration, view]);
+  // The 3D preview only ever receives valid props; otherwise it keeps the last valid ones.
+  const [lastValidProps, setLastValidProps] = useState<RenderProps>(() => defaultRenderProps(catalog));
+  const candidateProps = useMemo<RenderProps>(() => ({ configuration: previewConfiguration, view }), [previewConfiguration, view]);
+  const candidateOk = useMemo(() => validateRenderProps(catalog, candidateProps).ok, [catalog, candidateProps]);
+  if (candidateOk && candidateProps !== lastValidProps) setLastValidProps(candidateProps);
+  const renderProps = candidateOk ? candidateProps : lastValidProps;
 
   // Is the engraving visible from the current camera angle?
   const layout = useMemo(() => layoutFor(catalog, configuration.product), [catalog, configuration.product]);
@@ -92,6 +113,16 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
     if (has && !hadName.current && !nameVisible) showPreset(catalog.presentation.personalizationView);
     hadName.current = has;
   }, [name, nameVisible, showPreset, catalog]);
+
+  // Logo chosen or uploaded: turn the box so the outside of the lid is in view.
+  const logoAnchor = useMemo(() => logoAnchorFor(catalog, configuration.product), [catalog, configuration.product]);
+  const logoVisible = isAnchorVisible(layout, logoAnchor, view);
+  const shownLogo = useRef<string | null>(null);
+  useEffect(() => {
+    const key = logo.state.mode === "none" ? null : `${logo.artwork?.name ?? ""}/${logo.artwork?.dataUrl.length ?? 0}`;
+    if (key !== null && key !== shownLogo.current && !logoVisible) showPreset(catalog.presentation.logoView);
+    shownLogo.current = key;
+  }, [logo.state.mode, logo.artwork, logoVisible, showPreset, catalog]);
 
   // Keep the design in the page URL (no new history entry per click).
   useEffect(() => {
@@ -117,7 +148,13 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
     [],
   );
   const noticeTexts = Object.keys(notices).map((code) =>
-    code === "FONT_FALLBACK" ? t.fontFallback : code === "HDRI_FALLBACK" ? t.lightingFallback : notices[code].message,
+    code === "FONT_FALLBACK"
+      ? t.fontFallback
+      : code === "HDRI_FALLBACK"
+        ? t.lightingFallback
+        : code === "LOGO_FALLBACK"
+          ? t.logo.previewFailed
+          : notices[code].message,
   );
 
   const nameErrors = personalization.ok
@@ -129,7 +166,16 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
       .replace("{model}", product.name)
       .replace("{exterior}", labels.color(configuration.exterior).toLowerCase())
       .replace("{interior}", labels.color(configuration.interior).toLowerCase()) +
-    (lastValidName ? t.summaryName.replace("{name}", lastValidName) : "");
+    (lastValidName ? t.summaryName.replace("{name}", lastValidName) : "") +
+    (logo.state.mode === "none"
+      ? ""
+      : !logo.artwork
+        ? t.logo.summaryPending
+        : logo.state.mode === "one-color"
+          ? t.logo.summaryOne.replace("{color}", labels.logoColor(logo.state.color)).replace("{file}", logo.artwork.name)
+          : t.logo.summaryFull.replace("{file}", logo.artwork.name));
+  const logoErrors = logo.state.issues.map((issue) => labels.logoIssue(issue));
+  const canDownload = configurationOk && logo.complete && candidateOk && !downloading;
 
   const onDownload = useCallback(async () => {
     if (!playerRef.current) return;
@@ -183,9 +229,24 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
             nameVisible={nameVisible}
             onNameChange={setName}
             onShowLid={() => showPreset(catalog.presentation.personalizationView)}
+            logo={{
+              state: logo.state,
+              artwork: logo.artwork,
+              errors: logoErrors,
+              visibleInView: logoVisible,
+              onModeChange: logo.setMode,
+              onColorChange: logo.setColor,
+              onRemoveBackgroundChange: logo.setRemoveBackground,
+              onKeepInsideChange: logo.setKeepInside,
+              onFile: uploadLogo,
+              onPasteWithoutImage: logo.pastedWithoutImage,
+              onRemove: logo.remove,
+              onShowLogo: () => showPreset(catalog.presentation.logoView),
+            }}
             labels={labels}
             texts={t}
             modelMeta={modelMeta}
+            locale={locale}
           />
         </div>
 
@@ -198,7 +259,7 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
               variant="dark"
               size="md"
               onClick={onDownload}
-              disabled={downloading || !configurationOk}
+              disabled={!canDownload}
               className="px-4"
             >
               {t.download}
@@ -214,6 +275,7 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
               {copied ? t.copied : t.copyLink}
             </Button>
           </div>
+          {!logo.complete && !logo.state.reading && <p className="text-sm text-muted">{t.logo.needed}</p>}
           {downloadError && (
             <p role="alert" className="text-sm font-semibold text-accent">
               {t.downloadError}

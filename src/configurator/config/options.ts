@@ -23,6 +23,8 @@
  *     "match:interior" or "match:<piece id>" (e.g. the snap cap follows the strap).
  *   • Personalization limits: `personalization` (global) and
  *     `products[].engraving.maxLength` (per product override).
+ *   • Logo: `logo` (modes, neutral colours, upload rules) and `products[].logo`
+ *     (the area in the middle of the lid the logo is fitted into).
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import type { CatalogInput } from "../catalog/schema";
@@ -58,6 +60,8 @@ export const options = {
       },
       // Fitted area on the pocket front, centred below the snap (see README).
       engraving: { widthCm: 9, heightCm: 1.8, maxLength: 12 },
+      // Middle of the outside of the lid; the logo is fitted inside, aspect kept.
+      logo: { widthCm: 7, heightCm: 4 },
     },
     {
       id: "quartet-slim",
@@ -84,6 +88,7 @@ export const options = {
         maxWatchThickness: 1.2,
       },
       engraving: { widthCm: 14, heightCm: 1.8, maxLength: 18 },
+      logo: { widthCm: 9, heightCm: 4 },
     },
   ],
   defaultProduct: "duo",
@@ -174,6 +179,8 @@ export const options = {
       materials: ["nappa", "full-grain"],
       colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "nappa", color: "match:interior" },
+      // Always follows the interior; named in the Interior step note.
+      selectable: false,
     },
     {
       id: "snap-cap",
@@ -181,7 +188,8 @@ export const options = {
       description: "Leather-covered push fastener",
       materials: ["nappa", "full-grain"],
       colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
-      default: { material: "nappa", color: "match:strap" },
+      default: { material: "nappa", color: "match:interior" },
+      selectable: false,
     },
     {
       id: "zip-pull",
@@ -226,6 +234,35 @@ export const options = {
     },
   },
 
+  /* ─────────────────────────── Logo ─────────────────────────────── */
+  // For corporate orders: the customer's logo, as uploaded (a plain background
+  // removed), printed in full colour or in one colour in the middle of the
+  // outside of the lid. Area per product: products[].logo.
+  logo: {
+    enabled: true,
+    label: "Logo",
+    description: "For corporate orders: your logo, printed in the middle of the outside of the lid.",
+    modes: [
+      { id: "full-color", label: "Full colour", description: "Printed in its own colours, as uploaded." },
+      { id: "one-color", label: "One colour", description: "The whole logo printed in one colour." },
+    ],
+    // One-colour prints. Labels are shown exactly as written.
+    colors: [
+      { id: "zilver", label: "zilver", hex: "#c9ccd1", finish: "metallic", roughness: 0.3 },
+      { id: "wit", label: "wit", hex: "#f2f1ec", finish: "matte", roughness: 0.6 },
+      { id: "zwart", label: "zwart", hex: "#141416", finish: "matte", roughness: 0.55 },
+      { id: "goud", label: "goud", hex: "#d2ab5f", finish: "metallic", roughness: 0.3 },
+    ],
+    defaultColor: "zilver",
+    upload: {
+      formats: ["png", "jpeg", "svg"],
+      maxFileSizeMb: 10,
+      minLongestSidePx: 500,
+      previewMaxPx: 1024,
+    },
+    print: { roughness: 0.42 },
+  },
+
   /* ─────────────────────────── Construction ─────────────────────── */
   // Values the blueprints don't specify (radii, recesses, stitch layout).
   construction: {
@@ -268,7 +305,7 @@ export const options = {
     output: { width: 1600, height: 1000, renderScale: 2 },
     background: { center: "#fbfbfa", edge: "#e2e2df" },
     environment: { hdriPath: null, intensity: 1.0, exposure: 1.0 },
-    hardware: { name: "Brushed brass", hex: "#c9a45f", roughness: 0.3 },
+    hardware: { name: "Polished silver", hex: "#d6d8db", roughness: 0.24 },
     zipTape: { darkenExterior: 0.45 },
     views: [
       { id: "open", label: "Open", azimuth: 30, elevation: 31, lidAngle: 104 },
@@ -279,6 +316,7 @@ export const options = {
     ],
     defaultView: "open",
     personalizationView: "open",
+    logoView: "closed",
     camera: { fov: 24, framingMargin: 0.07, verticalOffset: 0.045, minElevation: 6, maxElevation: 84 },
   },
 } satisfies CatalogInput;

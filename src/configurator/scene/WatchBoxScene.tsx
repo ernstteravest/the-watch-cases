@@ -25,10 +25,10 @@ import {
 import type { ResolvedMaterial } from "../catalog/configuration";
 import type { BoxLayout, EngravingAnchor } from "../geometry/layout";
 import type { CameraSetup } from "./camera";
-import type { SceneDescription } from "./describeScene";
+import type { LogoDescription, SceneDescription } from "./describeScene";
 import type { EngravingMaps } from "./engraving/engravingMaps";
 import { AO_GROUP, buildBoxGeometries, type AoPrimitive } from "./geometry/boxGeometry";
-import { useEngravingMaps, useLeather, useStudioEnvironment } from "./hooks";
+import { useEngravingMaps, useLeather, useLogoTexture, useStudioEnvironment } from "./hooks";
 import { createMetalMaterial, createTapeMaterial, createThreadMaterial, type AoSettings } from "./materials/leatherMaterial";
 
 const DEG = Math.PI / 180;
@@ -154,7 +154,7 @@ const RenderGate: React.FC<{ ready: boolean; error: Error | null }> = ({ ready, 
   const handle = useRef<number | null>(null);
 
   useLayoutEffect(() => {
-    handle.current = delayRender("Preparing the watch box scene (environment, engraving font)", { timeoutInMilliseconds: 120_000 });
+    handle.current = delayRender("Preparing the watch box scene (environment, engraving font, logo)", { timeoutInMilliseconds: 120_000 });
     return () => {
       if (handle.current !== null) continueRender(handle.current);
       handle.current = null;
@@ -291,7 +291,77 @@ const EngravingDecal: React.FC<{ anchor: EngravingAnchor; maps: EngravingMaps; s
   );
 };
 
-const WatchBoxModel: React.FC<{ description: SceneDescription; engravingMaps: EngravingMaps | null }> = ({ description, engravingMaps }) => {
+/** Placeholder frame colour in full-colour mode (before an upload). */
+const PLACEHOLDER_HEX = "#8d9096";
+
+/**
+ * The printed logo: a thin decal on the middle of the outside of the lid.
+ * Full colour prints the image as it is; one colour prints its shape in ink
+ * (wit, zwart) or metallic foil (zilver, goud).
+ */
+const LogoDecal: React.FC<{ logo: LogoDescription; texture: HTMLCanvasElement }> = ({ logo, texture }) => {
+  const invalidate = useThree((s) => s.invalidate);
+  const map = useMemo(() => {
+    const t = new CanvasTexture(texture);
+    t.colorSpace = SRGBColorSpace;
+    t.anisotropy = 8;
+    return t;
+  }, [texture]);
+  const material = useMemo(
+    () =>
+      new MeshPhysicalMaterial({
+        map,
+        transparent: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -4,
+      }),
+    [map],
+  );
+  const ink = logo.ink;
+  const placeholder = logo.artwork === null;
+  const hex = ink ? ink.hex : placeholder ? PLACEHOLDER_HEX : "#ffffff";
+  const metallic = ink?.finish === "metallic";
+  const roughness = ink ? ink.roughness : logo.printRoughness;
+  useLayoutEffect(() => {
+    material.color.set(hex);
+    material.metalness = metallic ? 1 : 0;
+    material.roughness = roughness;
+    material.clearcoat = metallic ? 0.3 : 0.08;
+    material.opacity = placeholder ? 0.85 : 1;
+    material.needsUpdate = true;
+    invalidate();
+  }, [material, hex, metallic, roughness, placeholder, invalidate]);
+  useEffect(
+    () => () => {
+      map.dispose();
+      material.dispose();
+    },
+    [map, material],
+  );
+  // Orient the plane: local x → reading direction, local z → surface normal.
+  const { anchor } = logo;
+  const matrix = useMemo(() => {
+    const n = new Vector3(...anchor.normal).normalize();
+    const t = new Vector3(...anchor.tangent).normalize();
+    const b = new Vector3().crossVectors(n, t);
+    const m = new Matrix4().makeBasis(t, b, n);
+    m.setPosition(new Vector3(...anchor.center).addScaledVector(n, 0.004));
+    return m;
+  }, [anchor]);
+  return (
+    <mesh matrix={matrix} matrixAutoUpdate={false} material={material} renderOrder={2}>
+      <planeGeometry args={[logo.widthCm, logo.heightCm]} />
+    </mesh>
+  );
+};
+
+const WatchBoxModel: React.FC<{ description: SceneDescription; engravingMaps: EngravingMaps | null; logoTexture: HTMLCanvasElement | null }> = ({
+  description,
+  engravingMaps,
+  logoTexture,
+}) => {
   const { layout, construction, appearance } = description;
   const geometries = useMemo(() => buildBoxGeometries(layout, construction), [layout, construction]);
   useEffect(() => () => geometries.dispose(), [geometries]);
@@ -379,6 +449,7 @@ const WatchBoxModel: React.FC<{ description: SceneDescription; engravingMaps: En
               roughnessFactor={description.engraving.deboss.roughnessFactor}
             />
           ) : null}
+          {description.logo && logoTexture ? <LogoDecal logo={description.logo} texture={logoTexture} /> : null}
         </group>
       </group>
     </group>
@@ -390,14 +461,15 @@ const WatchBoxModel: React.FC<{ description: SceneDescription; engravingMaps: En
 export const WatchBoxScene: React.FC<{ description: SceneDescription }> = ({ description }) => {
   const environment = useStudioEnvironment(description.environment);
   const engraving = useEngravingMaps(description.engraving);
-  const ready = environment.ready && engraving.ready;
-  const error = environment.error ?? engraving.error;
+  const logo = useLogoTexture(description.logo);
+  const ready = environment.ready && engraving.ready && logo.ready;
+  const error = environment.error ?? engraving.error ?? logo.error;
   return (
     <>
       <CameraRig camera={description.camera} />
       <KeyLight layout={description.layout} />
       <StudioFloor layout={description.layout} />
-      <WatchBoxModel description={description} engravingMaps={engraving.value} />
+      <WatchBoxModel description={description} engravingMaps={engraving.value} logoTexture={logo.value} />
       <RenderGate ready={ready} error={error} />
     </>
   );

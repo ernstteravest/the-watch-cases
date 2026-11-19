@@ -10,6 +10,7 @@ import {
   validatePersonalization,
   type Catalog,
   type Configuration,
+  type LogoArtwork,
 } from "@/configurator/catalog";
 import { site } from "@/config/site";
 
@@ -28,8 +29,11 @@ export type QuoteLine = {
   quantity: number;
   unitPriceCents: number;
   lineTotalCents: number;
+  /** The design as ordered, without the logo image itself (see logoArtwork). */
   configuration: Configuration;
   engravingText: string | null;
+  /** The uploaded logo, to be stored as a file with the order (Stage 7). */
+  logoArtwork: LogoArtwork | null;
 };
 
 export type Quote = { lines: QuoteLine[]; subtotalCents: number; shippingCents: number; totalCents: number };
@@ -39,6 +43,7 @@ export type QuoteError =
   | { code: "INVALID_QUANTITY"; line: number }
   | { code: "INVALID_DESIGN"; line: number; issues: string[] }
   | { code: "INVALID_ENGRAVING"; line: number; issues: string[] }
+  | { code: "LOGO_MISSING"; line: number }
   | { code: "PRICE_NOT_SET"; line: number; product: string }
   | { code: "SHIPPING_NOT_AVAILABLE"; country: string }
   | { code: "SHIPPING_PRICE_NOT_SET"; country: string };
@@ -52,11 +57,8 @@ function surcharge(prices: PriceList, product: string, key: string): number {
 /** Surcharges for one configuration (all zero at launch: options are included in the price). */
 function optionSurcharges(prices: PriceList, c: Configuration): number {
   let total = surcharge(prices, c.product, `exterior:${c.exterior}`) + surcharge(prices, c.product, `interior:${c.interior}`);
-  for (const [pieceId, choice] of Object.entries(c.pieces)) {
-    total += surcharge(prices, c.product, `piece_material:${pieceId}:${choice.material}`);
-    total += surcharge(prices, c.product, `piece_color:${pieceId}:${choice.color}`);
-  }
   if (c.personalization.text) total += surcharge(prices, c.product, `engraving:${c.personalization.placement}`);
+  if (c.logo) total += surcharge(prices, c.product, `logo:${c.logo.mode}`);
   return total;
 }
 
@@ -99,9 +101,18 @@ export function quoteOrder(
     if (base === null || base === undefined) {
       return { ok: false, error: { code: "PRICE_NOT_SET", line: i, product: product.id } };
     }
+    if (line.configuration.logo && !line.configuration.logo.artwork) {
+      return { ok: false, error: { code: "LOGO_MISSING", line: i } };
+    }
+    const logoArtwork = line.configuration.logo?.artwork ?? null;
+    const { pieces: _legacyPieces, ...rest } = line.configuration;
+    void _legacyPieces;
     const configuration: Configuration = {
-      ...line.configuration,
+      ...rest,
       personalization: { ...line.configuration.personalization, text: engraving.value },
+      ...(line.configuration.logo
+        ? { logo: { ...line.configuration.logo, artwork: logoArtwork && { ...logoArtwork, dataUrl: "" } } }
+        : {}),
     };
     const unit = base + optionSurcharges(prices, configuration);
     out.push({
@@ -112,6 +123,7 @@ export function quoteOrder(
       lineTotalCents: unit * line.quantity,
       configuration,
       engravingText: engraving.value || null,
+      logoArtwork,
     });
   }
 
