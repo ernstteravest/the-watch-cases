@@ -213,3 +213,4 @@ revoke all on public.customers, public.orders, public.order_items,
               public.order_status_history, public.newsletter_subscribers
   from anon, authenticated;
 revoke all on sequence public.order_number_seq from anon, authenticated;
+revoke insert, update, delete, truncate on public.products, public.option_prices from anon, authenticated;

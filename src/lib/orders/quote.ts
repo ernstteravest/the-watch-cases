@@ -1,0 +1,120 @@
+/**
+ * Server-side price calculation for an order. The browser only sends WHAT
+ * the customer wants (model, design, quantity, address country); every
+ * amount is calculated here from the database prices. Pure function, so it
+ * can be tested without a database.
+ */
+import {
+  findProduct,
+  validateConfiguration,
+  validatePersonalization,
+  type Catalog,
+  type Configuration,
+} from "@/configurator/catalog";
+import { site } from "@/config/site";
+
+export type CartLineInput = { configuration: Configuration; quantity: number };
+
+export type PriceList = {
+  /** Price per product in cents incl. VAT; null = not decided (cannot be ordered). */
+  products: Record<string, number | null>;
+  /** Optional surcharges, keyed "kind:optionId" (product-specific first, then "*"). */
+  options?: Record<string, Record<string, number>>;
+};
+
+export type QuoteLine = {
+  productSlug: string;
+  productName: string;
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+  configuration: Configuration;
+  engravingText: string | null;
+};
+
+export type Quote = { lines: QuoteLine[]; subtotalCents: number; shippingCents: number; totalCents: number };
+
+export type QuoteError =
+  | { code: "EMPTY_CART" }
+  | { code: "INVALID_QUANTITY"; line: number }
+  | { code: "INVALID_DESIGN"; line: number; issues: string[] }
+  | { code: "INVALID_ENGRAVING"; line: number; issues: string[] }
+  | { code: "PRICE_NOT_SET"; line: number; product: string }
+  | { code: "SHIPPING_NOT_AVAILABLE"; country: string }
+  | { code: "SHIPPING_PRICE_NOT_SET"; country: string };
+
+export const MAX_QUANTITY = 10;
+
+function surcharge(prices: PriceList, product: string, key: string): number {
+  return prices.options?.[product]?.[key] ?? prices.options?.["*"]?.[key] ?? 0;
+}
+
+/** Surcharges for one configuration (all zero at launch: options are included in the price). */
+function optionSurcharges(prices: PriceList, c: Configuration): number {
+  let total = surcharge(prices, c.product, `exterior:${c.exterior}`) + surcharge(prices, c.product, `interior:${c.interior}`);
+  for (const [pieceId, choice] of Object.entries(c.pieces)) {
+    total += surcharge(prices, c.product, `piece_material:${pieceId}:${choice.material}`);
+    total += surcharge(prices, c.product, `piece_color:${pieceId}:${choice.color}`);
+  }
+  if (c.personalization.text) total += surcharge(prices, c.product, `engraving:${c.personalization.placement}`);
+  return total;
+}
+
+export function quoteOrder(
+  catalog: Catalog,
+  prices: PriceList,
+  lines: CartLineInput[],
+  shipping: { country: string; costs: Record<string, number | null> },
+): { ok: true; quote: Quote } | { ok: false; error: QuoteError } {
+  if (lines.length === 0) return { ok: false, error: { code: "EMPTY_CART" } };
+  if (!(site.shippingCountries as readonly string[]).includes(shipping.country)) {
+    return { ok: false, error: { code: "SHIPPING_NOT_AVAILABLE", country: shipping.country } };
+  }
+  const shippingCents = shipping.costs[shipping.country];
+  if (shippingCents === null || shippingCents === undefined) {
+    return { ok: false, error: { code: "SHIPPING_PRICE_NOT_SET", country: shipping.country } };
+  }
+
+  const out: QuoteLine[] = [];
+  for (const [i, line] of lines.entries()) {
+    if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > MAX_QUANTITY) {
+      return { ok: false, error: { code: "INVALID_QUANTITY", line: i } };
+    }
+    // Engraving first, so the customer gets the specific message.
+    const product = findProduct(catalog, line.configuration?.product ?? "");
+    const engraving = validatePersonalization(
+      String(line.configuration?.personalization?.text ?? ""),
+      catalog.personalization,
+      product,
+    );
+    if (!engraving.ok) {
+      return { ok: false, error: { code: "INVALID_ENGRAVING", line: i, issues: engraving.issues.map((x) => x.message) } };
+    }
+    const design = validateConfiguration(catalog, line.configuration);
+    if (!design.ok || !product) {
+      const issues = design.ok ? ["Unknown product"] : design.issues.map((x) => x.message);
+      return { ok: false, error: { code: "INVALID_DESIGN", line: i, issues } };
+    }
+    const base = prices.products[product.id];
+    if (base === null || base === undefined) {
+      return { ok: false, error: { code: "PRICE_NOT_SET", line: i, product: product.id } };
+    }
+    const configuration: Configuration = {
+      ...line.configuration,
+      personalization: { ...line.configuration.personalization, text: engraving.value },
+    };
+    const unit = base + optionSurcharges(prices, configuration);
+    out.push({
+      productSlug: product.id,
+      productName: product.name,
+      quantity: line.quantity,
+      unitPriceCents: unit,
+      lineTotalCents: unit * line.quantity,
+      configuration,
+      engravingText: engraving.value || null,
+    });
+  }
+
+  const subtotalCents = out.reduce((sum, l) => sum + l.lineTotalCents, 0);
+  return { ok: true, quote: { lines: out, subtotalCents, shippingCents, totalCents: subtotalCents + shippingCents } };
+}

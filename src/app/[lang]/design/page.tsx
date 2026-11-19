@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { products } from "@/catalog/products";
+import { getProducts } from "@/catalog/catalog-data";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { formatPrice } from "@/lib/format";
@@ -19,6 +19,7 @@ export default async function DesignPage({ params }: PageProps<"/[lang]/design">
   if (!isLocale(lang)) notFound();
   const t = await getDictionary(lang);
 
+  const products = await getProducts();
   const modelMeta = Object.fromEntries(
     products.map((p) => [
       p.slug,

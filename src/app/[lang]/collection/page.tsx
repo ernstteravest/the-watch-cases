@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { products } from "@/catalog/products";
+import { getProducts } from "@/catalog/catalog-data";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { pageMetadata } from "@/lib/page-metadata";
@@ -18,6 +18,7 @@ export default async function CollectionPage({ params }: PageProps<"/[lang]/coll
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   const t = await getDictionary(lang);
+  const products = await getProducts();
 
   return (
     <div className="container-page py-section">

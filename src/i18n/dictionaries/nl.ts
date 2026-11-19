@@ -152,6 +152,8 @@ const nl = {
       submit: "Aanmelden",
       invalid: "Vul een geldig e-mailadres in.",
       notReady: "De nieuwsbrief start bij de lancering. Uw aanmelding is nog niet opgeslagen.",
+      saved: "Dank u wel. Uw aanmelding is ontvangen; wij vragen u later per e-mail om deze te bevestigen.",
+      error: "Er ging iets mis. Probeer het later opnieuw.",
     },
   },
   collection: {

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getProduct } from "@/catalog/products";
+import { getProducts } from "@/catalog/catalog-data";
 import { features, site } from "@/config/site";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -23,8 +23,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   if (!isLocale(lang)) notFound();
   const t = await getDictionary(lang);
   const b = t.home.bands;
-  const duo = getProduct("duo");
-  const quartet = getProduct("quartet-slim");
+  const products = await getProducts();
+  const duo = products.find((p) => p.slug === "duo");
+  const quartet = products.find((p) => p.slug === "quartet-slim");
 
   const organization = {
     "@context": "https://schema.org",
@@ -45,29 +46,33 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       <Reassurance t={t} />
       <Intro t={t} />
       <CollectionNav locale={lang} t={t} />
-      <PhotoBand
-        id="duo"
-        image={bandDuo}
-        alt={b.duo.alt}
-        title={duo.name}
-        subtitle={b.duo.subtitle}
-        meta={b.from.replace("{price}", formatPrice(duo.priceFromCents, lang))}
-        link={{ label: b.more, href: href("collection", lang, duo.slug) }}
-      />
-      <PhotoBand
-        id="quartet-slim"
-        image={bandQuartet}
-        alt={b.quartetSlim.alt}
-        title={quartet.name}
-        subtitle={b.quartetSlim.subtitle}
-        meta={b.from.replace("{price}", formatPrice(quartet.priceFromCents, lang))}
-        link={{ label: b.more, href: href("collection", lang, quartet.slug) }}
-      />
+      {duo && (
+        <PhotoBand
+          id="duo"
+          image={bandDuo}
+          alt={b.duo.alt}
+          title={duo.name}
+          subtitle={b.duo.subtitle}
+          meta={b.from.replace("{price}", formatPrice(duo.priceFromCents, lang))}
+          link={{ label: b.more, href: href("collection", lang, duo.slug) }}
+        />
+      )}
+      {quartet && (
+        <PhotoBand
+          id="quartet-slim"
+          image={bandQuartet}
+          alt={b.quartetSlim.alt}
+          title={quartet.name}
+          subtitle={b.quartetSlim.subtitle}
+          meta={b.from.replace("{price}", formatPrice(quartet.priceFromCents, lang))}
+          link={{ label: b.more, href: href("collection", lang, quartet.slug) }}
+        />
+      )}
       <ConfiguratorTeaser locale={lang} t={t} />
       {features.readyMadeDesigns && <ReadyMadeDesigns locale={lang} t={t} />}
       <Process locale={lang} t={t} />
       <MoreFrom locale={lang} t={t} />
-      {features.newsletter && <Newsletter t={t} />}
+      {features.newsletter && <Newsletter t={t} locale={lang} />}
     </>
   );
 }

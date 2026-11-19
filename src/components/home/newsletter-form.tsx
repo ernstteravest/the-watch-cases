@@ -4,15 +4,30 @@ import { useActionState, useId } from "react";
 import { subscribeToNewsletter, type NewsletterState } from "@/app/actions/newsletter";
 import { Button } from "@/components/ui/button";
 
-type Labels = { label: string; placeholder: string; submit: string; invalid: string; notReady: string };
+type Labels = {
+  label: string;
+  placeholder: string;
+  submit: string;
+  invalid: string;
+  notReady: string;
+  saved: string;
+  error: string;
+};
 
-export function NewsletterForm({ labels }: { labels: Labels }) {
+export function NewsletterForm({ labels, locale }: { labels: Labels; locale: string }) {
   const [state, action, pending] = useActionState<NewsletterState, FormData>(subscribeToNewsletter, { status: "idle" });
   const id = useId();
-  const message = state.status === "invalid" ? labels.invalid : state.status === "not-ready" ? labels.notReady : null;
+  const message = {
+    idle: null,
+    invalid: labels.invalid,
+    "not-ready": labels.notReady,
+    saved: labels.saved,
+    error: labels.error,
+  }[state.status];
 
   return (
     <form action={action} noValidate className="flex max-w-[480px] flex-[1_1_340px] flex-col gap-2.5">
+      <input type="hidden" name="locale" value={locale} />
       <div className="flex flex-wrap gap-2.5">
         <label htmlFor={`${id}-email`} className="sr-only">
           {labels.label}
@@ -32,7 +47,11 @@ export function NewsletterForm({ labels }: { labels: Labels }) {
           {labels.submit}
         </Button>
       </div>
-      <p id={`${id}-msg`} role="status" className="min-h-5 text-sm text-muted">
+      <p
+        id={`${id}-msg`}
+        role="status"
+        className={state.status === "saved" ? "min-h-5 text-sm font-semibold text-accent" : "min-h-5 text-sm text-muted"}
+      >
         {message}
       </p>
     </form>
