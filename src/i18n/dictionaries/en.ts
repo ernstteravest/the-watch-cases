@@ -152,6 +152,101 @@ const en: Dictionary = {
       notReady: "The newsletter starts at launch. Your sign-up has not been saved yet.",
     },
   },
+  collection: {
+    title: "The collection",
+    intro: "Two leather watch boxes, made to order, with your name in the lid.",
+    capacity: "For {count} watches",
+    view: "View the {name}",
+  },
+  product: {
+    breadcrumb: "Collection",
+    cta: "Design your {name}",
+    ctaNote: "Choose the leather, lining, cushions and your name in the configurator.",
+    detailsTitle: "Details",
+    specs: {
+      capacity: "Capacity",
+      dimensions: "Dimensions",
+      dimensionsValue: "{l} × {w} × {h} cm (l × w × h)",
+      exterior: "Exterior",
+      exteriorValue: "Full-grain leather",
+      interior: "Interior",
+      interiorValue: "Suede lining",
+      cushions: "Cushions",
+      cushionsValue: "Suede or nappa",
+      engraving: "Engraving",
+      engravingValue: "Pressed into the lid, up to {max} characters, included",
+      production: "Production",
+      productionValue: "Made to order, made in 14 working days",
+      shipping: "Shipping",
+      shippingValue: "To the Netherlands, Belgium and Germany",
+      warranty: "Warranty",
+      warrantyValue: "One year, on stitching, zip and hardware",
+    },
+    gallery: "Photos of the {name}",
+    other: "See also",
+    models: {
+      duo: {
+        subtitle: "Two watches, your name inside",
+        description:
+          "The Duo holds two watches side by side on suede cushions. The lid has a pocket with a tab and a press stud, and below it we press your name into the leather.",
+        metaDescription: "The Duo: a leather watch box for two watches, made to order, with your name in the lid.",
+      },
+      "quartet-slim": {
+        subtitle: "Four watches, one long lid",
+        description:
+          "The Quartet Slim holds four watches in one slim row, under one long lid. The lid has a pocket with a tab and a press stud, with your name pressed into the leather below it.",
+        metaDescription:
+          "The Quartet Slim: a slim leather watch box for four watches, made to order, with your name in the lid.",
+      },
+    },
+  },
+  pages: {
+    comingSoon: "This page will be completed soon.",
+    legalComingSoon: "This text will be added soon.",
+    backHome: "Back to the homepage",
+    emailUs: "Email us",
+    configure: {
+      title: "Design your watch box",
+      intro: "The configurator goes here: choose the model, leather, lining, cushions and your name, and turn the box to see your own one.",
+    },
+    howItsMade: {
+      title: "How it’s made",
+      intro: "From your design to the check in Amsterdam: how each box comes together will be described here soon.",
+    },
+    about: { title: "About us", intro: "The Watch Cases Amsterdam makes leather watch boxes to order." },
+    amsterdam: { title: "Amsterdam", intro: "The Watch Cases is based in Amsterdam." },
+    gifts: { title: "Gifts", intro: "A watch box with a name inside is a personal gift." },
+    business: {
+      title: "Business gifts",
+      intro: "Your logo on the lid and your colours inside. Tell us the quantity and the deadline and we’ll send you a quote.",
+    },
+    jewellers: {
+      title: "For jewellers",
+      intro: "Would you like to offer our watch boxes in your shop? We’d love to hear from you.",
+    },
+    faq: { title: "FAQ", intro: "Answers to the most common questions will appear here soon." },
+    delivery: {
+      title: "Delivery",
+      intro: "We ship to the Netherlands, Belgium and Germany. Every box is made to order; production takes 14 working days.",
+    },
+    returns: {
+      title: "Returns and warranty",
+      intro: "Every box comes with a one-year warranty. The full terms will follow soon.",
+    },
+    contact: {
+      title: "Contact",
+      intro: "Questions about a design, an order or a business enquiry? Send us an email.",
+    },
+    terms: { title: "Terms and conditions", intro: "" },
+    privacy: { title: "Privacy policy", intro: "" },
+    cookies: { title: "Cookie policy", intro: "" },
+    cart: { title: "Bag", intro: "Your bag is empty." },
+    checkout: { title: "Checkout", intro: "Checkout is not available yet." },
+    notFound: {
+      title: "Page not found",
+      intro: "This page doesn’t exist (any more). You may find what you’re looking for on the homepage or in the collection.",
+    },
+  },
 };
 
 export default en;

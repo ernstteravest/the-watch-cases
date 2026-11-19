@@ -154,6 +154,101 @@ const nl = {
       notReady: "De nieuwsbrief start bij de lancering. Uw aanmelding is nog niet opgeslagen.",
     },
   },
+  collection: {
+    title: "De collectie",
+    intro: "Twee leren horlogeboxen, op bestelling gemaakt, met uw naam in het deksel.",
+    capacity: "Voor {count} horloges",
+    view: "Bekijk de {name}",
+  },
+  product: {
+    breadcrumb: "Collectie",
+    cta: "Ontwerp uw {name}",
+    ctaNote: "U kiest het leer, de voering, de kussens en uw naam in de configurator.",
+    detailsTitle: "Details",
+    specs: {
+      capacity: "Capaciteit",
+      dimensions: "Afmetingen",
+      dimensionsValue: "{l} × {w} × {h} cm (l × b × h)",
+      exterior: "Buitenkant",
+      exteriorValue: "Volnerf leer",
+      interior: "Binnenkant",
+      interiorValue: "Suède voering",
+      cushions: "Kussens",
+      cushionsValue: "Suède of nappa",
+      engraving: "Gravering",
+      engravingValue: "In het deksel gedrukt, tot {max} tekens, inbegrepen",
+      production: "Productie",
+      productionValue: "Op bestelling gemaakt, productietijd 14 werkdagen",
+      shipping: "Verzending",
+      shippingValue: "Naar Nederland, België en Duitsland",
+      warranty: "Garantie",
+      warrantyValue: "Eén jaar, op stiksels, rits en beslag",
+    },
+    gallery: "Foto’s van de {name}",
+    other: "Bekijk ook",
+    models: {
+      duo: {
+        subtitle: "Twee horloges, uw naam erin",
+        description:
+          "De Duo bewaart twee horloges naast elkaar op suède kussens. In het deksel zit een vak met een lipje en een drukknoop, en daaronder drukken wij uw naam in het leer.",
+        metaDescription: "De Duo: een leren horlogebox voor twee horloges, op bestelling gemaakt, met uw naam in het deksel.",
+      },
+      "quartet-slim": {
+        subtitle: "Vier horloges, één lang deksel",
+        description:
+          "De Quartet Slim bewaart vier horloges in één slanke rij, onder één lang deksel. In het deksel zit een vak met een lipje en een drukknoop, met daaronder uw naam in het leer gedrukt.",
+        metaDescription:
+          "De Quartet Slim: een slanke leren horlogebox voor vier horloges, op bestelling gemaakt, met uw naam in het deksel.",
+      },
+    },
+  },
+  pages: {
+    comingSoon: "Deze pagina wordt binnenkort aangevuld.",
+    legalComingSoon: "Deze tekst wordt binnenkort toegevoegd.",
+    backHome: "Terug naar de homepage",
+    emailUs: "Mail ons",
+    configure: {
+      title: "Ontwerp uw horlogebox",
+      intro: "Hier komt de configurator: kies het model, het leer, de voering, de kussens en uw naam, en draai de box rond om uw eigen exemplaar te zien.",
+    },
+    howItsMade: {
+      title: "Zo wordt het gemaakt",
+      intro: "Van uw ontwerp tot de controle in Amsterdam: hier leest u binnenkort hoe elke box ontstaat.",
+    },
+    about: { title: "Over ons", intro: "The Watch Cases Amsterdam maakt leren horlogeboxen op bestelling." },
+    amsterdam: { title: "Amsterdam", intro: "The Watch Cases is gevestigd in Amsterdam." },
+    gifts: { title: "Cadeaus", intro: "Een horlogebox met een naam erin is een persoonlijk cadeau." },
+    business: {
+      title: "Zakelijke cadeaus",
+      intro: "Uw logo op het deksel en uw kleuren binnenin. Vertel ons het aantal en de deadline, dan sturen wij u een offerte.",
+    },
+    jewellers: {
+      title: "Voor juweliers",
+      intro: "Wilt u onze horlogeboxen in uw winkel aanbieden? Wij horen graag van u.",
+    },
+    faq: { title: "Veelgestelde vragen", intro: "Hier vindt u binnenkort antwoorden op de meest gestelde vragen." },
+    delivery: {
+      title: "Verzending",
+      intro: "Wij verzenden naar Nederland, België en Duitsland. Elke box wordt op bestelling gemaakt; de productietijd is 14 werkdagen.",
+    },
+    returns: {
+      title: "Retour en garantie",
+      intro: "Op elke box zit één jaar garantie. De volledige voorwaarden volgen binnenkort.",
+    },
+    contact: {
+      title: "Contact",
+      intro: "Vragen over een ontwerp, een bestelling of een zakelijke aanvraag? Stuur ons een e-mail.",
+    },
+    terms: { title: "Algemene voorwaarden", intro: "" },
+    privacy: { title: "Privacyverklaring", intro: "" },
+    cookies: { title: "Cookieverklaring", intro: "" },
+    cart: { title: "Winkelmand", intro: "Uw winkelmand is leeg." },
+    checkout: { title: "Afrekenen", intro: "Afrekenen is nog niet beschikbaar." },
+    notFound: {
+      title: "Pagina niet gevonden",
+      intro: "Deze pagina bestaat niet (meer). Misschien vindt u wat u zoekt via de homepage of de collectie.",
+    },
+  },
 } as const;
 
 type Widen<T> = T extends string
