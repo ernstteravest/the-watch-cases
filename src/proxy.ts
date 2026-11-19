@@ -1,6 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale } from "@/i18n/config";
 import { parsePublicPath, translatePath } from "@/i18n/routes";
+import { productSlugs } from "@/catalog/slugs";
+
+/** Internal path of a product page with an unknown slug → serve the 404 page. */
+function isUnknownProduct(internalPath: string): boolean {
+  const match = internalPath.match(/^\/collection\/([^/]+)\/?$/);
+  return match !== null && !(productSlugs as readonly string[]).includes(match[1]);
+}
+
+const NOT_FOUND_PATH = "/_not-found-page";
 
 /**
  * Maps public URLs onto the internal `app/[lang]/…` routes.
@@ -22,7 +31,8 @@ export function proxy(request: NextRequest) {
   const { locale, path } = parsePublicPath(pathname);
 
   if (locale === "en") {
-    return NextResponse.rewrite(new URL(`/en${path === "/" ? "" : path}${request.nextUrl.search}`, request.url));
+    const target = isUnknownProduct(path) ? NOT_FOUND_PATH : path;
+    return NextResponse.rewrite(new URL(`/en${target === "/" ? "" : target}${request.nextUrl.search}`, request.url));
   }
 
   // Dutch: translate Dutch slugs to the internal (English) folder names.
@@ -37,7 +47,8 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  const target = internal ?? path;
+  const resolved = internal ?? path;
+  const target = isUnknownProduct(resolved) ? NOT_FOUND_PATH : resolved;
   return NextResponse.rewrite(
     new URL(`/${defaultLocale}${target === "/" ? "" : target}${request.nextUrl.search}`, request.url),
   );

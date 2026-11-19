@@ -15,7 +15,9 @@ import together from "@/assets/images/home/how-it-works.jpg";
  * placeholder from `site.pricePlaceholder` (€xxx.xx).
  * Dimensions are in cm, from the blueprints in the configurator catalog.
  */
-export type ProductSlug = "duo" | "quartet-slim";
+import type { ProductSlug } from "./slugs";
+
+export type { ProductSlug };
 
 export type ProductImage = { src: StaticImageData; alt: Record<Locale, string> };
 

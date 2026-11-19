@@ -156,6 +156,7 @@ const en: Dictionary = {
     title: "The collection",
     intro: "Two leather watch boxes, made to order, with your name in the lid.",
     capacity: "For {count} watches",
+    from: "From {price}",
     view: "View the {name}",
   },
   product: {

@@ -158,6 +158,7 @@ const nl = {
     title: "De collectie",
     intro: "Twee leren horlogeboxen, op bestelling gemaakt, met uw naam in het deksel.",
     capacity: "Voor {count} horloges",
+    from: "Vanaf {price}",
     view: "Bekijk de {name}",
   },
   product: {

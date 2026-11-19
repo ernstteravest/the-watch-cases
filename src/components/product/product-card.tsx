@@ -26,7 +26,7 @@ export function ProductCard({ product, locale, t }: { product: Product; locale: 
         <span className="flex items-baseline justify-between gap-4">
           <span className="text-h3 font-bold group-hover:text-accent">{product.name}</span>
           <span className="text-body">
-            {t.home.bands.from.split(",")[0].replace("{price}", formatPrice(product.priceFromCents, locale))}
+            {t.collection.from.replace("{price}", formatPrice(product.priceFromCents, locale))}
           </span>
         </span>
         <span className="text-lg font-light text-body">{model.subtitle}</span>
