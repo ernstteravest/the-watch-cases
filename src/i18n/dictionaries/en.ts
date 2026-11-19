@@ -150,6 +150,8 @@ const en: Dictionary = {
       submit: "Sign up",
       invalid: "Please enter a valid email address.",
       notReady: "The newsletter starts at launch. Your sign-up has not been saved yet.",
+      saved: "Thank you. Your sign-up has been received; we will ask you to confirm it by e-mail later.",
+      error: "Something went wrong. Please try again later.",
     },
   },
   collection: {

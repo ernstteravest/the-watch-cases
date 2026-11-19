@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getProductBySlug, getProducts } from "@/catalog/catalog-data";
 import { getProduct, isProductSlug, products } from "@/catalog/products";
 import { site } from "@/config/site";
 import { isLocale, locales } from "@/i18n/config";
@@ -35,10 +36,11 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/collect
   const { lang, slug } = await params;
   if (!isLocale(lang) || !isProductSlug(slug)) notFound();
   const t = await getDictionary(lang);
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
+  if (!product) notFound();
   const model = t.product.models[slug];
-  const other = products.find((p) => p.slug !== slug)!;
-  const otherImage = other.images[0];
+  const other = (await getProducts()).find((p) => p.slug !== slug);
+  const otherImage = other?.images[0];
 
   // Structured data for search engines. No offer/price until prices are decided.
   const jsonLd = {
@@ -101,6 +103,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/collect
         </div>
       </div>
 
+      {other && otherImage && (
       <section aria-label={t.product.other}>
         <PhotoBand
           image={otherImage.src}
@@ -111,6 +114,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/collect
           link={{ label: t.collection.view.replace("{name}", other.name), href: href("collection", lang, other.slug) }}
         />
       </section>
+      )}
     </>
   );
 }

@@ -1,7 +1,8 @@
+import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { NewsletterForm } from "./newsletter-form";
 
-export function Newsletter({ t }: { t: Dictionary }) {
+export function Newsletter({ t, locale }: { t: Dictionary; locale: Locale }) {
   const n = t.home.newsletter;
   return (
     <section className="border-t border-line bg-paper">
@@ -11,7 +12,16 @@ export function Newsletter({ t }: { t: Dictionary }) {
           <p className="text-muted">{n.text}</p>
         </div>
         <NewsletterForm
-          labels={{ label: n.label, placeholder: n.placeholder, submit: n.submit, invalid: n.invalid, notReady: n.notReady }}
+          locale={locale}
+          labels={{
+            label: n.label,
+            placeholder: n.placeholder,
+            submit: n.submit,
+            invalid: n.invalid,
+            notReady: n.notReady,
+            saved: n.saved,
+            error: n.error,
+          }}
         />
       </div>
     </section>
