@@ -6,7 +6,15 @@ export const site = {
   name: "The Watch Cases Amsterdam",
   shortName: "The Watch Cases",
   domain: "thewatchcases.nl",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  /**
+   * Public address of the site. Set NEXT_PUBLIC_SITE_URL once the domain is
+   * live; until then Vercel's own production address is used automatically.
+   */
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000"),
   email: "thewatchcases@gmail.com",
   city: "Amsterdam",
   country: "NL",
