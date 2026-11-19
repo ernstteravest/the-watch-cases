@@ -1,0 +1,68 @@
+import Link from "next/link";
+import { getImageProps } from "next/image";
+import type { Locale } from "@/i18n/config";
+import type { Dictionary } from "@/i18n/dictionaries/nl";
+import { href } from "@/i18n/routes";
+import { Button } from "@/components/ui/button";
+import posterDesktop from "@/assets/images/home/hero-poster.jpg";
+import posterMobile from "@/assets/images/home/hero-poster-mobile.jpg";
+import { HeroFilm } from "./hero-film";
+
+/**
+ * Desktop/tablet: full-height film, headline and buttons over the bottom.
+ * Phone: the film in a 4:3 frame (whole box visible), text below on walnut.
+ */
+export function Hero({ locale, t }: { locale: Locale; t: Dictionary }) {
+  const h = t.home.hero;
+
+  const { props: desktop } = getImageProps({ src: posterDesktop, alt: "", sizes: "100vw", preload: true });
+  const { props: mobile } = getImageProps({ src: posterMobile, alt: "", sizes: "100vw", preload: true });
+  const poster = (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktop.srcSet} sizes="100vw" />
+      <img {...mobile} alt="" className="absolute inset-0 size-full object-cover" />
+    </picture>
+  );
+
+  return (
+    <section
+      aria-label={h.filmLabel}
+      className="relative overflow-hidden bg-walnut-light text-paper md:h-[clamp(540px,82vh,860px)]"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden md:absolute md:inset-0 md:aspect-auto">
+        <HeroFilm
+          desktopSrc="/video/hero-film.mp4"
+          mobileSrc="/video/hero-film-mobile.mp4"
+          poster={poster}
+          labels={{ pause: h.pause, play: h.play }}
+        />
+        {/* Phone: fade the film into the walnut text area below. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 -bottom-px h-2/5 bg-gradient-to-b from-transparent to-walnut-light md:hidden"
+        />
+      </div>
+      {/* Desktop: darken top and bottom so the headline reads. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 hidden bg-[linear-gradient(180deg,rgba(12,11,10,0.22)_0%,rgba(12,11,10,0)_26%,rgba(12,11,10,0.26)_56%,rgba(12,11,10,0.82)_100%)] md:block"
+      />
+
+      <div className="container-page relative -mt-10 flex flex-col items-center gap-5 pb-12 text-center md:mt-0 md:h-full md:justify-end md:pb-[clamp(44px,7vh,80px)]">
+        <h1 className="text-display font-bold [text-shadow:0_2px_36px_rgba(0,0,0,0.4)]">
+          {h.titleLine1}
+          <br />
+          {h.titleLine2}
+        </h1>
+        <div className="mt-1.5 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
+          <Button asChild variant="light">
+            <Link href={href("configure", locale)}>{h.primary}</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={href("collection", locale)}>{h.secondary}</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
