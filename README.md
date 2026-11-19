@@ -16,6 +16,8 @@ npm run dev
 Open http://localhost:3000 (Dutch) or http://localhost:3000/en (English).
 The design system is at `/stijlgids` (`/en/styleguide`).
 
+Run the configurator tests with `npm test`.
+
 ## Where things live
 
 | Path | What |
@@ -28,6 +30,9 @@ The design system is at `/stijlgids` (`/en/styleguide`).
 | `src/components/ui/` | Buttons, links, icons, sheet (shadcn/ui style) |
 | `src/components/layout/` | Announcement bar, header, menu, language switch, footer |
 | `src/assets/images/` | Product renders |
+| `src/configurator/config/options.ts` | Configurator catalog: models, colours, leathers, pieces, engraving rules |
+| `src/configurator/labels.ts` | Dutch/English names for colours, leathers and pieces |
+| `src/components/configurator/` | Configurator page UI (preview, options, engraving, download) |
 | `reference/` | Design reference (render and HTML mockup) |
 
 ## Languages
