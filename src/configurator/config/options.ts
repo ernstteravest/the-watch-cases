@@ -90,12 +90,12 @@ export const options = {
 
   /* ─────────────────────────── Colours ──────────────────────────── */
   colors: [
-    { id: "rolex-green", name: "Rolex green", hex: "#0f4a32", stitch: "#d6c9a6", tones: { suede: "#145a3d", nappa: "#11513a" } },
+    { id: "money-green", name: "Money green", hex: "#0f4a32", stitch: "#d6c9a6", tones: { suede: "#145a3d", nappa: "#11513a" } },
     { id: "cognac", name: "Cognac", hex: "#7b4322", stitch: "#ead9b8", tones: { suede: "#a5663a" } },
     { id: "black", name: "Black", hex: "#19191a", stitch: "#3b3b3d", tones: { suede: "#202022" } },
     { id: "dark-brown", name: "Dark brown", hex: "#3a2416", stitch: "#cdb38c", tones: { suede: "#4a3020" } },
     { id: "navy", name: "Navy", hex: "#20273a", stitch: "#e3d3b2", tones: { suede: "#2a3350" } },
-    { id: "mansory-orange", name: "Mansory orange", hex: "#e0621c", stitch: "#a8450f" },
+    { id: "signal-orange", name: "Signal orange", hex: "#e0621c", stitch: "#a8450f" },
     { id: "light-blue", name: "Light blue", hex: "#9cb7d2", stitch: "#7894b2" },
     { id: "beige", name: "Beige", hex: "#dcc6a4", stitch: "#bea681" },
     { id: "red", name: "Red", hex: "#7a1420", stitch: "#4e0c14", tones: { suede: "#741320" } },
@@ -132,14 +132,14 @@ export const options = {
     label: "Exterior",
     description: "Full-grain leather",
     material: "full-grain",
-    colors: ["rolex-green", "cognac", "black", "dark-brown", "navy"],
+    colors: ["money-green", "cognac", "black", "dark-brown", "navy"],
     default: "navy",
   },
   interior: {
     label: "Interior",
     description: "Suede lining",
     material: "suede",
-    colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black"],
+    colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black"],
     default: "beige",
   },
 
@@ -149,7 +149,7 @@ export const options = {
       id: "cushions",
       label: "Watch cushions",
       materials: ["suede", "nappa"],
-      colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
+      colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "suede", color: "match:interior" },
     },
     {
@@ -157,7 +157,7 @@ export const options = {
       label: "Lid pocket",
       description: "Padded pocket front inside the lid",
       materials: ["suede", "nappa"],
-      colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
+      colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "suede", color: "match:interior" },
     },
     {
@@ -165,14 +165,14 @@ export const options = {
       label: "Lid flap",
       description: "Tuck-in flap over the pocket opening",
       materials: ["suede", "nappa"],
-      colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
+      colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "suede", color: "match:pocket" },
     },
     {
       id: "strap",
       label: "Lid strap",
       materials: ["nappa", "full-grain"],
-      colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
+      colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "nappa", color: "match:interior" },
     },
     {
@@ -180,14 +180,14 @@ export const options = {
       label: "Snap cap",
       description: "Leather-covered push fastener",
       materials: ["nappa", "full-grain"],
-      colors: ["mansory-orange", "rolex-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
+      colors: ["signal-orange", "money-green", "navy", "light-blue", "beige", "cognac", "red", "black", "dark-brown"],
       default: { material: "nappa", color: "match:strap" },
     },
     {
       id: "zip-pull",
       label: "Zip pull tab",
       materials: ["full-grain", "nappa"],
-      colors: ["rolex-green", "cognac", "black", "dark-brown", "navy", "mansory-orange", "light-blue", "beige", "red"],
+      colors: ["money-green", "cognac", "black", "dark-brown", "navy", "signal-orange", "light-blue", "beige", "red"],
       default: { material: "full-grain", color: "match:exterior" },
     },
   ],

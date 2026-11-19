@@ -11,12 +11,12 @@ import type { Locale } from "@/i18n/config";
 type Names = Record<string, Partial<Record<Locale, string>>>;
 
 const colors: Names = {
-  "rolex-green": { nl: "Rolex-groen", en: "Rolex green" },
+  "money-green": { nl: "Money green", en: "Money green" },
   cognac: { nl: "Cognac", en: "Cognac" },
   black: { nl: "Zwart", en: "Black" },
   "dark-brown": { nl: "Donkerbruin", en: "Dark brown" },
   navy: { nl: "Navy", en: "Navy" },
-  "mansory-orange": { nl: "Mansory-oranje", en: "Mansory orange" },
+  "signal-orange": { nl: "Signaaloranje", en: "Signal orange" },
   "light-blue": { nl: "Lichtblauw", en: "Light blue" },
   beige: { nl: "Beige", en: "Beige" },
   red: { nl: "Rood", en: "Red" },

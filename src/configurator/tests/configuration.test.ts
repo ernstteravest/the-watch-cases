@@ -68,11 +68,11 @@ describe("configuration validation", () => {
   });
 
   it("resolves match chains: snap cap → strap → interior", () => {
-    const r = validateConfiguration(catalog, withChanges((c) => (c.interior = "mansory-orange")));
+    const r = validateConfiguration(catalog, withChanges((c) => (c.interior = "signal-orange")));
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value.appearance.pieces.strap.key).toBe("nappa/mansory-orange");
-    expect(r.value.appearance.pieces["snap-cap"].key).toBe("nappa/mansory-orange");
+    expect(r.value.appearance.pieces.strap.key).toBe("nappa/signal-orange");
+    expect(r.value.appearance.pieces["snap-cap"].key).toBe("nappa/signal-orange");
     expect(r.value.appearance.pieces["zip-pull"].color.id).toBe(r.value.configuration.exterior);
   });
 
