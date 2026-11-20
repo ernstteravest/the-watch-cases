@@ -31,6 +31,7 @@ export const routes = {
   cookies: { nl: "/cookies", en: "/cookies" },
   cart: { nl: "/winkelmand", en: "/cart" },
   checkout: { nl: "/afrekenen", en: "/checkout" },
+  checkoutThanks: { nl: "/afrekenen/bedankt", en: "/checkout/thank-you" },
   styleguide: { nl: "/stijlgids", en: "/styleguide" },
 } as const satisfies Record<string, Record<Locale, string>>;
 

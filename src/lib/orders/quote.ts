@@ -10,11 +10,14 @@ import {
   validatePersonalization,
   type Catalog,
   type Configuration,
-  type LogoArtwork,
+  type LogoFormat,
 } from "@/configurator/catalog";
 import { site } from "@/config/site";
 
-export type CartLineInput = { configuration: Configuration; quantity: number };
+/** The uploaded logo file, described (the file itself is uploaded separately). */
+export type LogoFileInfo = { name: string; format: LogoFormat; width: number; height: number };
+
+export type CartLineInput = { configuration: Configuration; quantity: number; logo?: LogoFileInfo | null };
 
 export type PriceList = {
   /** Price per product in cents incl. VAT; null = not decided (cannot be ordered). */
@@ -32,8 +35,8 @@ export type QuoteLine = {
   /** The design as ordered, without the logo image itself (see logoArtwork). */
   configuration: Configuration;
   engravingText: string | null;
-  /** The uploaded logo, to be stored as a file with the order (Stage 7). */
-  logoArtwork: LogoArtwork | null;
+  /** The customer's logo file (uploaded to storage after the order is created). */
+  logo: LogoFileInfo | null;
 };
 
 export type Quote = { lines: QuoteLine[]; subtotalCents: number; shippingCents: number; totalCents: number };
@@ -101,18 +104,17 @@ export function quoteOrder(
     if (base === null || base === undefined) {
       return { ok: false, error: { code: "PRICE_NOT_SET", line: i, product: product.id } };
     }
-    if (line.configuration.logo && !line.configuration.logo.artwork) {
+    const logo = line.configuration.logo ? (line.logo ?? null) : null;
+    if (line.configuration.logo && !logo) {
       return { ok: false, error: { code: "LOGO_MISSING", line: i } };
     }
-    const logoArtwork = line.configuration.logo?.artwork ?? null;
     const { pieces: _legacyPieces, ...rest } = line.configuration;
     void _legacyPieces;
+    // Snapshot for the order: the logo is described by its file, the image itself lives in storage.
     const configuration: Configuration = {
       ...rest,
       personalization: { ...line.configuration.personalization, text: engraving.value },
-      ...(line.configuration.logo
-        ? { logo: { ...line.configuration.logo, artwork: logoArtwork && { ...logoArtwork, dataUrl: "" } } }
-        : {}),
+      ...(line.configuration.logo && logo ? { logo: { ...line.configuration.logo, artwork: { ...logo, dataUrl: "" } } } : {}),
     };
     const unit = base + optionSurcharges(prices, configuration);
     out.push({
@@ -123,7 +125,7 @@ export function quoteOrder(
       lineTotalCents: unit * line.quantity,
       configuration,
       engravingText: engraving.value || null,
-      logoArtwork,
+      logo,
     });
   }
 
