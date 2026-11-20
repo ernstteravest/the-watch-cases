@@ -41,7 +41,17 @@ const hexToRgb = (hex: string): [number, number, number] =>
   [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number];
 
 /** The logo as printed in one colour, drawn with the same function as the 3D print. */
-function OneColourThumb({ artwork, color, label }: { artwork: LogoArtwork; color: LogoColor; label: string }) {
+export function OneColourThumb({
+  artwork,
+  color,
+  label,
+  className = "max-h-24 max-w-[70%] object-contain",
+}: {
+  artwork: Pick<LogoArtwork, "dataUrl" | "width" | "height">;
+  color: Pick<LogoColor, "hex">;
+  label: string;
+  className?: string;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +71,7 @@ function OneColourThumb({ artwork, color, label }: { artwork: LogoArtwork; color
       cancelled = true;
     };
   }, [artwork, color.hex]);
-  return <canvas ref={canvas} role="img" aria-label={label} className="max-h-24 max-w-[70%] object-contain" />;
+  return <canvas ref={canvas} role="img" aria-label={label} className={className} />;
 }
 
 /**

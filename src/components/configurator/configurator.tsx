@@ -22,7 +22,10 @@ import { layoutFor, logoAnchorFor } from "@/configurator/scene/describeScene";
 import type { SceneEvent, SceneStatusApi } from "@/configurator/scene/SceneStatus";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
+import Link from "next/link";
+import { addToCart, type CartLogo } from "@/lib/cart/cart";
 import { Button } from "@/components/ui/button";
+import { describeDesign } from "./describe";
 import { downloadPreviewImage } from "./download-image";
 import { OptionsPanel } from "./options-panel";
 import { PreviewStage } from "./preview-stage";
@@ -31,6 +34,7 @@ import { useViewState } from "./use-view-state";
 type Props = {
   locale: Locale;
   t: Dictionary["configurator"];
+  cart: { texts: Dictionary["cart"]; href: string };
   /** Per model id: translated capacity and price lines. */
   modelMeta: Record<string, { capacity: string; price: string }>;
 };
@@ -47,7 +51,7 @@ export default function ConfiguratorRoot(props: Props) {
   return <Configurator {...props} catalog={catalogResult.value} />;
 }
 
-function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Catalog }) {
+function Configurator({ catalog, locale, t, modelMeta, cart }: Props & { catalog: Catalog }) {
   const labels = useMemo(() => createLabels(catalog, locale), [catalog, locale]);
 
   // Start from the design in the URL (or the model chosen on a product page).
@@ -58,7 +62,24 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
   const logo = useLogo(catalog);
   const { upload } = logo;
   // Stable, so the paste listener isn't re-attached on every render.
-  const uploadLogo = useCallback((file: File) => void upload(file), [upload]);
+  // The configurator keeps a prepared copy of the logo; for printing we also keep
+  // the file exactly as the customer uploaded it.
+  const pendingFile = useRef<File | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const uploadLogo = useCallback(
+    (file: File) => {
+      pendingFile.current = file;
+      void upload(file);
+    },
+    [upload],
+  );
+  const uploaded = logo.state.upload;
+  const [seenUpload, setSeenUpload] = useState(uploaded);
+  if (uploaded !== seenUpload) {
+    setSeenUpload(uploaded);
+    setOriginalFile(uploaded ? pendingFile.current : null);
+  }
+  const [cartState, setCartState] = useState<"idle" | "adding" | "added" | "full" | "storage">("idle");
   const [notices, setNotices] = useState<Record<string, SceneEvent>>({});
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState(false);
@@ -161,21 +182,53 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
     ? []
     : personalization.issues.map((issue) => labels.personalizationIssue(issue, maxLength, Array.from(name.trim()).length));
 
-  const summary =
-    t.summary
-      .replace("{model}", product.name)
-      .replace("{exterior}", labels.color(configuration.exterior).toLowerCase())
-      .replace("{interior}", labels.color(configuration.interior).toLowerCase()) +
-    (lastValidName ? t.summaryName.replace("{name}", lastValidName) : "") +
-    (logo.state.mode === "none"
-      ? ""
-      : !logo.artwork
-        ? t.logo.summaryPending
-        : logo.state.mode === "one-color"
-          ? t.logo.summaryOne.replace("{color}", labels.logoColor(logo.state.color)).replace("{file}", logo.artwork.name)
-          : t.logo.summaryFull.replace("{file}", logo.artwork.name));
+  const summary = describeDesign(
+    catalog,
+    labels,
+    t,
+    { ...configuration, personalization: { ...configuration.personalization, text: lastValidName } },
+    logo.state.mode === "none"
+      ? null
+      : logo.artwork
+        ? { mode: logo.state.mode, color: logo.state.color, name: logo.artwork.name }
+        : "pending",
+  );
   const logoErrors = logo.state.issues.map((issue) => labels.logoIssue(issue));
   const canDownload = configurationOk && logo.complete && candidateOk && !downloading;
+  const canAddToCart = configurationOk && candidateOk && personalization.ok && logo.complete && cartState !== "adding";
+
+  const onAddToCart = useCallback(async () => {
+    if (!personalization.ok) return;
+    setCartState("adding");
+    const choice = logo.choice;
+    const artwork = logo.artwork;
+    const cartLogo: CartLogo | null =
+      choice && artwork
+        ? {
+            mode: choice.mode,
+            ...(choice.mode === "one-color" ? { color: choice.color } : {}),
+            name: artwork.name,
+            format: artwork.format,
+            width: artwork.width,
+            height: artwork.height,
+          }
+        : null;
+    const design: Configuration = {
+      ...configuration,
+      personalization: { ...configuration.personalization, text: personalization.value },
+      ...(choice ? { logo: { ...choice, artwork: null } } : {}),
+    };
+    const files =
+      artwork && cartLogo
+        ? {
+            original: originalFile ?? (await (await fetch(artwork.dataUrl)).blob()),
+            originalName: originalFile?.name ?? artwork.name,
+            preview: artwork.dataUrl,
+          }
+        : null;
+    const result = await addToCart({ configuration: design, designUrl: window.location.href, logo: cartLogo }, files);
+    setCartState(result.ok ? "added" : result.reason);
+  }, [configuration, personalization, logo.choice, logo.artwork, originalFile]);
 
   const onDownload = useCallback(async () => {
     if (!playerRef.current) return;
@@ -253,6 +306,21 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
         <footer className="flex flex-col gap-3 border-t border-line bg-sand px-[var(--spacing-gutter)] py-5 lg:px-8">
           <p className="text-[15px] leading-snug">{summary}</p>
           <p className="text-sm text-muted">{modelMeta[product.id]?.price}</p>
+          <Button type="button" size="lg" onClick={onAddToCart} disabled={!canAddToCart} className="w-full">
+            {cartState === "adding" ? cart.texts.adding : cart.texts.add}
+          </Button>
+          <p role="status" className="text-sm empty:hidden">
+            {cartState === "added" && (
+              <>
+                <span className="font-semibold">{cart.texts.added}</span>{" "}
+                <Link href={cart.href} className="font-semibold text-accent underline underline-offset-4">
+                  {cart.texts.view}
+                </Link>
+              </>
+            )}
+            {cartState === "full" && <span className="font-semibold text-accent">{cart.texts.full}</span>}
+            {cartState === "storage" && <span className="font-semibold text-accent">{cart.texts.storageError}</span>}
+          </p>
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
@@ -282,7 +350,7 @@ function Configurator({ catalog, locale, t, modelMeta }: Props & { catalog: Cata
             </p>
           )}
           <p className="text-sm text-muted">
-            {t.savedNote} {t.orderSoon}
+            {t.savedNote}
           </p>
         </footer>
       </aside>
