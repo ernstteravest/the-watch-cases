@@ -88,11 +88,11 @@ const nl = {
       more: "Ontdek meer",
       duo: {
         subtitle: "Twee horloges, uw naam erin",
-        alt: "Duo horlogebox in navy leer, open, met beige suède binnenin en de initialen A.V. in het deksel",
+        alt: "Duo horlogebox in navy leer, open, met beige suède binnenin, op een houten wandtafel",
       },
       quartetSlim: {
         subtitle: "Vier horloges, één lang deksel",
-        alt: "Quartet Slim horlogebox in zwart leer, open, met rode suède binnenin",
+        alt: "Quartet Slim horlogebox in zwart leer, open, met rode suède binnenin, op een eikenhouten tafel",
       },
     },
     configurator: {
@@ -121,7 +121,7 @@ const nl = {
         { title: "Gecontroleerd in Amsterdam", text: "Letter voor letter tegen uw ontwerp, daarna naar u verstuurd." },
       ],
       link: "Lees hoe het gemaakt wordt",
-      alt: "De Duo en de Quartet Slim open naast elkaar op een notenhouten bureau",
+      alt: "De Quartet Slim met de initialen L.M.H. en de Duo met A.V., open naast elkaar op een houten tafel",
     },
     more: {
       title: "Meer van The Watch Cases",
@@ -129,19 +129,19 @@ const nl = {
         title: "Cadeaus",
         text: "Hun naam erin, ingepakt met een handgeschreven kaartje.",
         link: "Cadeaugids",
-        alt: "Een gesloten navy Duo horlogebox op een notenhouten bureau",
+        alt: "Een gesloten navy Duo horlogebox op een houten bureau",
       },
       business: {
         title: "Zakelijke cadeaus",
         text: "Uw logo op het deksel en uw kleuren binnenin. Vertel ons het aantal en de deadline, dan sturen wij u een offerte.",
         link: "Vraag een offerte aan",
-        alt: "Een gesloten zwarte Quartet Slim horlogebox op een notenhouten bureau",
+        alt: "Een gesloten zwarte Quartet Slim horlogebox op een lichte eikenhouten tafel",
       },
       jewellers: {
         title: "Bij uw juwelier",
         text: "Voel eerst het leer en de stiksels. Scan de kaart op de display en uw juwelier blijft betrokken bij uw bestelling.",
         link: "Voor juweliers",
-        alt: "Een open Duo horlogebox op een notenhouten bureau, van opzij gezien",
+        alt: "Duo horlogebox in navy leer, open, met beige suède binnenin, op een houten wandtafel",
       },
     },
     newsletter: {

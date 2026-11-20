@@ -112,6 +112,7 @@ export default async function ProductPage({ params }: PageProps<"/[lang]/collect
           subtitle={t.product.models[other.slug].subtitle}
           meta={t.home.bands.from.replace("{price}", formatPrice(other.priceFromCents, lang))}
           link={{ label: t.collection.view.replace("{name}", other.name), href: href("collection", lang, other.slug) }}
+          focus={other.bandFocus}
         />
       </section>
       )}
