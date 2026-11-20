@@ -86,11 +86,11 @@ const en: Dictionary = {
       more: "Discover more",
       duo: {
         subtitle: "Two watches, your name inside",
-        alt: "Duo watch box in navy leather, open, beige suede inside, initials A.V. pressed into the lid",
+        alt: "Duo watch box in navy leather, open, with beige suede inside, on a wooden console table",
       },
       quartetSlim: {
         subtitle: "Four watches, one long lid",
-        alt: "Quartet Slim watch box in black leather, open, red suede inside",
+        alt: "Quartet Slim watch box in black leather, open, with red suede inside, on an oak table",
       },
     },
     configurator: {
@@ -119,7 +119,7 @@ const en: Dictionary = {
         { title: "Checked in Amsterdam", text: "Against your design, letter by letter, then posted to you." },
       ],
       link: "Read how it’s made",
-      alt: "The Duo and the Quartet Slim open side by side on a walnut desk",
+      alt: "The Quartet Slim with the initials L.M.H. and the Duo with A.V., open side by side on a wooden table",
     },
     more: {
       title: "More from The Watch Cases",
@@ -127,19 +127,19 @@ const en: Dictionary = {
         title: "Gifts",
         text: "Their name inside, wrapped with a handwritten note.",
         link: "Gift guide",
-        alt: "A closed navy Duo watch box on a walnut desk",
+        alt: "A closed navy Duo watch box on a wooden desk",
       },
       business: {
         title: "Business gifts",
         text: "Your logo on the lid and your colours inside. Tell us the quantity and the deadline and we’ll send you a quote.",
         link: "Ask for a quote",
-        alt: "A closed black Quartet Slim watch box on a walnut desk",
+        alt: "A closed black Quartet Slim watch box on a light oak table",
       },
       jewellers: {
         title: "At your jeweller",
         text: "Feel the leather and the stitching first. Scan the card on the display and your jeweller stays with your order.",
         link: "For jewellers",
-        alt: "A Duo watch box open on a walnut desk, seen from the side",
+        alt: "Duo watch box in navy leather, open, with beige suede inside, on a wooden console table",
       },
     },
     newsletter: {

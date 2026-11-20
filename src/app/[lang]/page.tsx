@@ -55,6 +55,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           subtitle={b.duo.subtitle}
           meta={b.from.replace("{price}", formatPrice(duo.priceFromCents, lang))}
           link={{ label: b.more, href: href("collection", lang, duo.slug) }}
+          focus={duo.bandFocus}
         />
       )}
       {quartet && (
@@ -66,6 +67,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           subtitle={b.quartetSlim.subtitle}
           meta={b.from.replace("{price}", formatPrice(quartet.priceFromCents, lang))}
           link={{ label: b.more, href: href("collection", lang, quartet.slug) }}
+          focus={quartet.bandFocus}
         />
       )}
       <ConfiguratorTeaser locale={lang} t={t} />
