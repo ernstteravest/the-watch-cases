@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale } from "@/i18n/config";
 import { parsePublicPath, translatePath } from "@/i18n/routes";
+import { isProductEnabled } from "@/catalog/availability";
 import { productSlugs } from "@/catalog/slugs";
 
 /** Internal path of a product page with an unknown slug → serve the 404 page. */
@@ -10,6 +11,20 @@ function isUnknownProduct(internalPath: string): boolean {
 }
 
 const NOT_FOUND_PATH = "/_not-found-page";
+
+/** A known model that is switched off right now (features in config/site.ts). */
+function switchedOffProduct(internalPath: string): boolean {
+  const match = internalPath.match(/^\/collection\/([^/]+)\/?$/);
+  return match !== null && (productSlugs as readonly string[]).includes(match[1]) && !isProductEnabled(match[1]);
+}
+
+/** Temporary redirect (307): the page returns when the model is switched on again. */
+function toCollection(request: NextRequest, locale: "nl" | "en") {
+  const url = request.nextUrl.clone();
+  url.pathname = locale === "en" ? "/en/collection" : "/collectie";
+  url.search = "";
+  return NextResponse.redirect(url, 307);
+}
 
 /**
  * Maps public URLs onto the internal `app/[lang]/…` routes.
@@ -31,6 +46,7 @@ export function proxy(request: NextRequest) {
   const { locale, path } = parsePublicPath(pathname);
 
   if (locale === "en") {
+    if (switchedOffProduct(path)) return toCollection(request, "en");
     const target = isUnknownProduct(path) ? NOT_FOUND_PATH : path;
     return NextResponse.rewrite(new URL(`/en${target === "/" ? "" : target}${request.nextUrl.search}`, request.url));
   }
@@ -48,6 +64,7 @@ export function proxy(request: NextRequest) {
   }
 
   const resolved = internal ?? path;
+  if (switchedOffProduct(resolved)) return toCollection(request, "nl");
   const target = isUnknownProduct(resolved) ? NOT_FOUND_PATH : resolved;
   return NextResponse.rewrite(
     new URL(`/${defaultLocale}${target === "/" ? "" : target}${request.nextUrl.search}`, request.url),

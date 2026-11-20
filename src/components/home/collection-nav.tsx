@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { isProductEnabled } from "@/catalog/availability";
 import { features } from "@/config/site";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
@@ -13,7 +14,7 @@ export function CollectionNav({ locale, t }: { locale: Locale; t: Dictionary }) 
   const links = [
     { label: t.home.subnav.all, href: "#collection", current: true },
     { label: t.nav.duo, href: "#duo" },
-    { label: t.nav.quartetSlim, href: "#quartet-slim" },
+    ...(isProductEnabled("quartet-slim") ? [{ label: t.nav.quartetSlim, href: "#quartet-slim" }] : []),
     ...(features.readyMadeDesigns ? [{ label: t.nav.designs, href: "#designs" }] : []),
     { label: t.nav.howItsMade, href: "#how-its-made" },
   ];

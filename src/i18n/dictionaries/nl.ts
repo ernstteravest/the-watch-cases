@@ -5,6 +5,8 @@
 const nl = {
   meta: {
     title: "The Watch Cases Amsterdam – Leren horlogeboxen, vervaardigd voor uw collectie",
+    descriptionDuoOnly:
+      "Een leren horlogebox voor twee horloges. U kiest het leer, de voering en uw naam in het deksel. Met de hand gemaakt na uw bestelling, gecontroleerd in Amsterdam.",
     description:
       "Leren horlogeboxen voor twee of vier horloges. U kiest het leer, de voering en uw naam in het deksel. Met de hand gemaakt na uw bestelling, gecontroleerd in Amsterdam.",
   },
@@ -66,7 +68,7 @@ const nl = {
     reassurance: {
       label: "Wat u krijgt",
       items: [
-        { title: "Gravering inbegrepen", text: "Tot 12 tekens op de Duo, 18 op de Quartet Slim" },
+        { title: "Gravering inbegrepen", text: "Tot 12 tekens op de Duo, 18 op de Quartet Slim", textDuoOnly: "Tot 12 tekens, in het deksel gedrukt" },
         { title: "Gemaakt na uw bestelling", text: "Productietijd 14 werkdagen" },
         { title: "Verzending in NL, BE en DE", text: "Nederland, België en Duitsland" },
         { title: "Eén jaar garantie", text: "Op stiksels, rits en beslag" },
@@ -76,6 +78,8 @@ const nl = {
       titleLine1: "Ontdek de",
       titleLine2: "collectie",
       text: "Twee leren horlogeboxen: de Duo voor twee horloges en de Quartet Slim voor vier. U kiest het leer aan de buitenkant, de suède binnenin en de kussens, en wij drukken uw naam in het deksel. Elke box wordt na uw bestelling met de hand gesneden en gestikt, en in Amsterdam tegen uw ontwerp gecontroleerd voordat hij naar u toe komt.",
+      textDuoOnly:
+        "Een leren horlogebox voor twee horloges: de Duo. U kiest het leer aan de buitenkant, de suède binnenin en de kussens, en wij drukken uw naam in het deksel. Elke box wordt na uw bestelling met de hand gesneden en gestikt, en in Amsterdam tegen uw ontwerp gecontroleerd voordat hij naar u toe komt.",
       link: "Vind uw box",
     },
     subnav: {
@@ -159,6 +163,7 @@ const nl = {
   collection: {
     title: "De collectie",
     intro: "Twee leren horlogeboxen, op bestelling gemaakt, met uw naam in het deksel.",
+    introDuoOnly: "Een leren horlogebox voor twee horloges, op bestelling gemaakt, met uw naam in het deksel.",
     capacity: "Voor {count} horloges",
     from: "Vanaf {price}",
     view: "Bekijk de {name}",
@@ -341,6 +346,7 @@ const nl = {
     logoReview: "Met logo: wij controleren uw logo voordat de productie begint.",
     logoMissing: "Het logo van dit ontwerp is niet meer beschikbaar in deze browser. Wijzig het ontwerp en upload het logo opnieuw.",
     each: "per stuk",
+    unavailable: "Dit model is op dit moment niet beschikbaar. Verwijder het uit uw winkelmand om te kunnen bestellen.",
   },
   checkout: {
     title: "Afrekenen",
@@ -394,6 +400,7 @@ const nl = {
       INVALID_DESIGN: "Een ontwerp in uw winkelmand is niet meer beschikbaar. Wijzig of verwijder het.",
       INVALID_ENGRAVING: "Een gravering in uw winkelmand is niet geldig. Wijzig het ontwerp.",
       LOGO_MISSING: "Het logo van een ontwerp ontbreekt. Wijzig het ontwerp en upload het logo opnieuw.",
+      PRODUCT_UNAVAILABLE: "Een model in uw winkelmand is op dit moment niet beschikbaar. Verwijder het uit uw winkelmand.",
       payments: "Online betalen is nog niet actief. Uw bestelling is niet geplaatst en er is niets afgeschreven.",
       error: "Er ging iets mis bij het plaatsen van uw bestelling. Er is niets afgeschreven. Probeer het opnieuw.",
       upload: "Uw logo kon niet worden geüpload. Er is niets afgeschreven. Probeer het opnieuw.",

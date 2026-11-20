@@ -4,7 +4,9 @@ import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { href } from "@/i18n/routes";
 import { Reveal } from "@/components/motion/reveal";
 import { TextLink } from "@/components/ui/text-link";
+import { offersSeveralModels } from "@/catalog/availability";
 import howItWorks from "@/assets/images/home/how-it-works.jpg";
+import duoOpen from "@/assets/images/home/band-duo.jpg";
 
 /** "From your screen to your desk": photo next to the four order steps. */
 export function Process({ locale, t }: { locale: Locale; t: Dictionary }) {
@@ -13,8 +15,8 @@ export function Process({ locale, t }: { locale: Locale; t: Dictionary }) {
     <section id="how-its-made" className="container-page flex scroll-mt-16 flex-wrap gap-[clamp(32px,4vw,72px)] py-section">
       <Reveal className="min-w-0 flex-[1_1_400px]">
         <Image
-          src={howItWorks}
-          alt={p.alt}
+          src={offersSeveralModels ? howItWorks : duoOpen}
+          alt={offersSeveralModels ? p.alt : t.home.bands.duo.alt}
           placeholder="blur"
           sizes="(min-width: 1024px) 50vw, 100vw"
           className="aspect-[4/3] w-full rounded-card bg-walnut object-cover"

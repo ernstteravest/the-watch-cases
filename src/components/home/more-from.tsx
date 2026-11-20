@@ -8,10 +8,12 @@ import { ChevronIcon } from "@/components/ui/icons";
 import gifts from "@/assets/images/home/more-gifts.jpg";
 import business from "@/assets/images/home/more-business.jpg";
 import jewellers from "@/assets/images/home/more-jewellers.jpg";
+import { offersSeveralModels } from "@/catalog/availability";
 
 const cards = [
   { key: "gifts", route: "gifts", image: gifts },
-  { key: "business", route: "business", image: business },
+  // The business card shows the closed Quartet Slim; the closed Duo while only the Duo is offered.
+  { key: "business", route: "business", image: offersSeveralModels ? business : gifts },
   { key: "jewellers", route: "jewellers", image: jewellers },
 ] as const satisfies readonly { key: string; route: RouteKey; image: unknown }[];
 
@@ -32,7 +34,7 @@ export function MoreFrom({ locale, t }: { locale: Locale; t: Dictionary }) {
                     <span className="block overflow-hidden rounded-card bg-walnut">
                       <Image
                         src={card.image}
-                        alt={c.alt}
+                        alt={card.key === "business" && !offersSeveralModels ? m.gifts.alt : c.alt}
                         placeholder="blur"
                         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                         className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out-soft group-hover:scale-[1.03]"

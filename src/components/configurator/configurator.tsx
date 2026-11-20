@@ -13,6 +13,7 @@ import {
   type Configuration,
   type RenderProps,
 } from "@/configurator/catalog";
+import { isProductEnabled } from "@/catalog/availability";
 import { decodeDesign, encodeDesign } from "@/configurator/design-link";
 import { isEngravingPlacement } from "@/configurator/geometry/layout";
 import { createLabels } from "@/configurator/labels";
@@ -55,7 +56,7 @@ function Configurator({ catalog, locale, t, modelMeta, cart }: Props & { catalog
   const labels = useMemo(() => createLabels(catalog, locale), [catalog, locale]);
 
   // Start from the design in the URL (or the model chosen on a product page).
-  const [initial] = useState(() => decodeDesign(catalog, new URLSearchParams(window.location.search)));
+  const [initial] = useState(() => decodeDesign(catalog, new URLSearchParams(window.location.search), isProductEnabled));
   const [configuration, setConfiguration] = useState<Configuration>(initial.configuration);
   const [name, setName] = useState(initial.name);
   const { view, showPreset, rotateBy } = useViewState(catalog);

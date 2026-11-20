@@ -3,6 +3,8 @@ import type { Dictionary } from "./nl";
 const en: Dictionary = {
   meta: {
     title: "The Watch Cases Amsterdam – Leather watch boxes, designed by you",
+    descriptionDuoOnly:
+      "A leather watch box for two watches. You choose the leather, the lining and the name in the lid. Made by hand after you order, checked in Amsterdam.",
     description:
       "Leather watch boxes for two or four watches. You choose the leather, the lining and the name in the lid. Made by hand after you order, checked in Amsterdam.",
   },
@@ -64,7 +66,7 @@ const en: Dictionary = {
     reassurance: {
       label: "What is included",
       items: [
-        { title: "Engraving included", text: "Up to 12 characters on the Duo, 18 on the Quartet Slim" },
+        { title: "Engraving included", text: "Up to 12 characters on the Duo, 18 on the Quartet Slim", textDuoOnly: "Up to 12 characters, pressed into the lid" },
         { title: "Made after you order", text: "Made in 14 working days" },
         { title: "Shipping to NL, BE and DE", text: "The Netherlands, Belgium and Germany" },
         { title: "One-year warranty", text: "On stitching, zip and hardware" },
@@ -74,6 +76,8 @@ const en: Dictionary = {
       titleLine1: "Explore the",
       titleLine2: "collection",
       text: "Two leather watch boxes: the Duo for two watches and the Quartet Slim for four. You choose the leather outside, the suede inside and the cushions, and we press your name into the lid. Each box is cut and stitched by hand after you order, then checked against your design in Amsterdam before it comes to you.",
+      textDuoOnly:
+        "A leather watch box for two watches: the Duo. You choose the leather outside, the suede inside and the cushions, and we press your name into the lid. Each box is cut and stitched by hand after you order, then checked against your design in Amsterdam before it comes to you.",
       link: "Find your box",
     },
     subnav: {
@@ -157,6 +161,7 @@ const en: Dictionary = {
   collection: {
     title: "The collection",
     intro: "Two leather watch boxes, made to order, with your name in the lid.",
+    introDuoOnly: "A leather watch box for two watches, made to order, with your name in the lid.",
     capacity: "For {count} watches",
     from: "From {price}",
     view: "View the {name}",
@@ -339,6 +344,7 @@ const en: Dictionary = {
     logoReview: "With logo: we check your logo before production starts.",
     logoMissing: "This design’s logo is no longer available in this browser. Edit the design and upload the logo again.",
     each: "each",
+    unavailable: "This model isn’t available at the moment. Remove it from your bag to place your order.",
   },
   checkout: {
     title: "Checkout",
@@ -392,6 +398,7 @@ const en: Dictionary = {
       INVALID_DESIGN: "A design in your bag is no longer available. Edit or remove it.",
       INVALID_ENGRAVING: "An engraving in your bag isn’t valid. Edit the design.",
       LOGO_MISSING: "A design’s logo is missing. Edit the design and upload the logo again.",
+      PRODUCT_UNAVAILABLE: "A model in your bag isn’t available at the moment. Please remove it from your bag.",
       payments: "Online payment isn’t active yet. Your order has not been placed and nothing has been charged.",
       error: "Something went wrong placing your order. Nothing has been charged. Please try again.",
       upload: "Your logo couldn’t be uploaded. Nothing has been charged. Please try again.",

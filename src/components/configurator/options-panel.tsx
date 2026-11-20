@@ -9,6 +9,7 @@ import {
   type Configuration,
   type LogoArtwork,
 } from "@/configurator/catalog";
+import { isProductEnabled } from "@/catalog/availability";
 import type { Labels } from "@/configurator/labels";
 import type { LogoState } from "@/configurator/logo/useLogo";
 import { cn } from "@/lib/utils";
@@ -109,7 +110,7 @@ export function OptionsPanel({
     <div className="flex flex-col">
       <Step index={++step} title={texts.model}>
         <div role="radiogroup" aria-label={texts.model} className="grid grid-cols-2 gap-3">
-          {catalog.products.map((p) => {
+          {catalog.products.filter((p) => isProductEnabled(p.id)).map((p) => {
             const checked = configuration.product === p.id;
             return (
               <label

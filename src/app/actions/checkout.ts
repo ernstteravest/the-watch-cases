@@ -1,5 +1,6 @@
 "use server";
 
+import { isProductEnabled } from "@/catalog/availability";
 import { getCatalog, type Configuration } from "@/configurator/catalog";
 import { site } from "@/config/site";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -50,7 +51,7 @@ async function quote(lines: unknown, country: string) {
   const db = createAdminClient();
   if (!db) return { db: null, result: { ok: false as const, error: { code: "UNAVAILABLE" as const } } };
   const [prices, costs] = await Promise.all([loadPriceList(db), shippingCosts(db)]);
-  return { db, result: quoteOrder(getCatalog(), prices, sanitizeLines(lines), { country, costs }) };
+  return { db, result: quoteOrder(getCatalog(), prices, sanitizeLines(lines), { country, costs }, isProductEnabled) };
 }
 
 /** Totals for the order summary while the visitor fills in the form. */

@@ -25,9 +25,20 @@ export function encodeDesign(_catalog: Catalog, { configuration, name }: DesignS
   return params;
 }
 
-export function decodeDesign(catalog: Catalog, params: URLSearchParams): DesignState {
+/**
+ * @param isOffered models currently on offer (the website can switch a model
+ *   off); a link to another model opens with the first model on offer.
+ */
+export function decodeDesign(
+  catalog: Catalog,
+  params: URLSearchParams,
+  isOffered: (productId: string) => boolean = () => true,
+): DesignState {
   const model = params.get("model") ?? "";
-  const productId = findProduct(catalog, model) ? model : catalog.defaultProduct;
+  const fallback = isOffered(catalog.defaultProduct)
+    ? catalog.defaultProduct
+    : (catalog.products.find((p) => isOffered(p.id))?.id ?? catalog.defaultProduct);
+  const productId = findProduct(catalog, model) && isOffered(model) ? model : fallback;
   const base = defaultConfiguration(catalog, productId);
 
   const candidate: Configuration = {

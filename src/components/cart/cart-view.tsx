@@ -9,6 +9,7 @@ import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { getLogo, removeFromCart, setQuantity, MAX_QUANTITY, type CartLine } from "@/lib/cart/cart";
 import { useCart } from "@/lib/cart/use-cart";
 import { formatPrice } from "@/lib/format";
+import { isProductEnabled } from "@/catalog/availability";
 import { describeDesign } from "@/components/configurator/describe";
 import { OneColourThumb } from "@/components/configurator/logo-field";
 import { Button } from "@/components/ui/button";
@@ -117,6 +118,7 @@ export function CartView({ locale, t, summaryTexts, prices, links }: Props) {
                     line.logo ? { mode: line.logo.mode, color: line.logo.color, name: line.logo.name } : null,
                   )}
                 </p>
+                {!isProductEnabled(c.product) && <p className="text-sm font-semibold text-accent">{t.unavailable}</p>}
                 {line.logo && (
                   <LogoThumb
                     id={line.id}

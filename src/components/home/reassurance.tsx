@@ -1,3 +1,4 @@
+import { offersSeveralModels } from "@/catalog/availability";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { ClockIcon, EngraveIcon, ShieldIcon, TruckIcon } from "@/components/ui/icons";
 
@@ -19,7 +20,9 @@ export function Reassurance({ t }: { t: Dictionary }) {
               <Icon className="mt-0.5 flex-none text-accent" />
               <div>
                 <p className="text-[15px] font-semibold">{item.title}</p>
-                <p className="mt-0.5 text-sm text-muted">{item.text}</p>
+                <p className="mt-0.5 text-sm text-muted">
+                  {!offersSeveralModels && "textDuoOnly" in item ? item.textDuoOnly : item.text}
+                </p>
               </div>
             </li>
           );

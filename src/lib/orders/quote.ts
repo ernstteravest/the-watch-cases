@@ -47,6 +47,7 @@ export type QuoteError =
   | { code: "INVALID_DESIGN"; line: number; issues: string[] }
   | { code: "INVALID_ENGRAVING"; line: number; issues: string[] }
   | { code: "LOGO_MISSING"; line: number }
+  | { code: "PRODUCT_UNAVAILABLE"; line: number; product: string }
   | { code: "PRICE_NOT_SET"; line: number; product: string }
   | { code: "SHIPPING_NOT_AVAILABLE"; country: string }
   | { code: "SHIPPING_PRICE_NOT_SET"; country: string };
@@ -70,6 +71,8 @@ export function quoteOrder(
   prices: PriceList,
   lines: CartLineInput[],
   shipping: { country: string; costs: Record<string, number | null> },
+  /** Models currently on offer; others are refused (the website can switch a model off). */
+  isOffered: (productId: string) => boolean = () => true,
 ): { ok: true; quote: Quote } | { ok: false; error: QuoteError } {
   if (lines.length === 0) return { ok: false, error: { code: "EMPTY_CART" } };
   if (!(site.shippingCountries as readonly string[]).includes(shipping.country)) {
@@ -85,8 +88,11 @@ export function quoteOrder(
     if (!Number.isInteger(line.quantity) || line.quantity < 1 || line.quantity > MAX_QUANTITY) {
       return { ok: false, error: { code: "INVALID_QUANTITY", line: i } };
     }
-    // Engraving first, so the customer gets the specific message.
     const product = findProduct(catalog, line.configuration?.product ?? "");
+    if (product && !isOffered(product.id)) {
+      return { ok: false, error: { code: "PRODUCT_UNAVAILABLE", line: i, product: product.id } };
+    }
+    // Engraving first, so the customer gets the specific message.
     const engraving = validatePersonalization(
       String(line.configuration?.personalization?.text ?? ""),
       catalog.personalization,
