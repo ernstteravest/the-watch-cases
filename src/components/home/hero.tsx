@@ -9,8 +9,8 @@ import posterMobile from "@/assets/images/home/hero-poster-mobile.jpg";
 import { HeroFilm } from "./hero-film";
 
 /**
- * Desktop/tablet: full-height film, headline and buttons over the bottom.
- * Phone: the film in a 4:3 frame (whole box visible), text below on walnut.
+ * The film fully visible (4:3 on phones, wide on larger screens), with the
+ * headline and buttons below it on walnut, so nothing covers the product.
  */
 export function Hero({ locale, t }: { locale: Locale; t: Dictionary }) {
   const h = t.home.hero;
@@ -25,31 +25,24 @@ export function Hero({ locale, t }: { locale: Locale; t: Dictionary }) {
   );
 
   return (
-    <section
-      aria-label={h.filmLabel}
-      className="relative overflow-hidden bg-walnut-light text-paper md:h-[clamp(540px,82vh,860px)]"
-    >
-      <div className="relative aspect-[4/3] overflow-hidden md:absolute md:inset-0 md:aspect-auto">
+    <section aria-label={h.filmLabel} className="relative overflow-hidden bg-walnut-light text-paper">
+      {/* The film, fully visible: 4:3 on phones, wide on larger screens. */}
+      <div className="relative aspect-[4/3] overflow-hidden md:aspect-auto md:h-[clamp(420px,44vw,720px)]">
         <HeroFilm
           desktopSrc="/video/hero-film.mp4"
           mobileSrc="/video/hero-film-mobile.mp4"
           poster={poster}
           labels={{ pause: h.pause, play: h.play }}
         />
-        {/* Phone: fade the film into the walnut text area below. */}
+        {/* Fade the film into the walnut area with the headline below. */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 -bottom-px h-2/5 bg-gradient-to-b from-transparent to-walnut-light md:hidden"
+          className="absolute inset-x-0 -bottom-px h-2/5 bg-gradient-to-b from-transparent to-walnut-light md:h-1/4"
         />
       </div>
-      {/* Desktop: darken top and bottom so the headline reads. */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 hidden bg-[linear-gradient(180deg,rgba(12,11,10,0.22)_0%,rgba(12,11,10,0)_26%,rgba(12,11,10,0.26)_56%,rgba(12,11,10,0.82)_100%)] md:block"
-      />
 
-      <div className="container-page relative -mt-10 flex flex-col items-center gap-5 pb-12 text-center md:mt-0 md:h-full md:justify-end md:pb-[clamp(44px,7vh,80px)]">
-        <h1 className="text-display font-bold [text-shadow:0_2px_36px_rgba(0,0,0,0.4)]">
+      <div className="container-page relative -mt-10 flex flex-col items-center gap-5 pb-12 text-center md:-mt-6 md:pb-16">
+        <h1 className="text-display font-bold">
           {h.titleLine1}
           <br />
           {h.titleLine2}
