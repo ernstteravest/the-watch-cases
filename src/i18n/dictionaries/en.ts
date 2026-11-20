@@ -57,7 +57,7 @@ const en: Dictionary = {
       titleLine2: "your collection",
       primary: "Design your watch box",
       secondary: "See the collection",
-      filmLabel: "Film: the Duo and the Quartet Slim watch boxes on a walnut desk",
+      filmLabel: "Film: a navy Duo watch box opens on a wooden table",
       pause: "Pause film",
       play: "Play film",
     },
