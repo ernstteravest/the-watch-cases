@@ -131,3 +131,25 @@ export async function markOrderPaid(db: Db, paymentReference: string): Promise<{
   if (error) throw new Error(`Could not mark order paid: ${error.message}`);
   return data ? { orderNumber: data.order_number } : null;
 }
+
+/** Everything the confirmation e-mail needs, for an order found by its payment reference. */
+export async function getOrderForConfirmation(db: Db, paymentReference: string) {
+  const { data, error } = await db
+    .from("orders")
+    .select(
+      "id, order_number, locale, shipping_cents, total_cents, requires_logo_review, customers(email, first_name), order_items(product_name, quantity, line_total_cents, configuration)",
+    )
+    .eq("payment_reference", paymentReference)
+    .maybeSingle();
+  if (error) throw new Error(`Could not load order: ${error.message}`);
+  return data as unknown as {
+    id: string;
+    order_number: string;
+    locale: Locale;
+    shipping_cents: number;
+    total_cents: number;
+    requires_logo_review: boolean;
+    customers: { email: string; first_name: string | null } | null;
+    order_items: { product_name: string; quantity: number; line_total_cents: number; configuration: Json }[];
+  } | null;
+}
