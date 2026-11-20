@@ -36,4 +36,11 @@ describe("design link", () => {
     const decoded = decodeDesign(catalog, new URLSearchParams("model=duo&ext=rolex-green"));
     expect(decoded.configuration.exterior).toBe(defaultConfiguration(catalog, "duo").exterior);
   });
+
+  it("opens a switched-off model's link with a model that is on offer", () => {
+    const decoded = decodeDesign(catalog, new URLSearchParams("model=quartet-slim&ext=black&int=red"), (id) => id === "duo");
+    expect(decoded.configuration.product).toBe("duo");
+    expect(decoded.configuration.exterior).toBe("black");
+    expect(decoded.configuration.interior).toBe("red");
+  });
 });

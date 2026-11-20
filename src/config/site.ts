@@ -45,6 +45,11 @@ export const site = {
  * pages; the code and data structures exist either way.
  */
 export const features = {
+  /**
+   * Quartet Slim: hidden while false. Turning it on brings back its pages,
+   * photos, texts, menu links, configurator option and ordering.
+   */
+  quartetSlim: false,
   /** Ready-made designs: hidden until the designs and prices are final. */
   readyMadeDesigns: false,
   /** Payments: stays false until Stripe is configured and approved. */

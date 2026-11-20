@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import { notFound } from "next/navigation";
+import { offersSeveralModels } from "@/catalog/availability";
 import { site } from "@/config/site";
 import { isLocale, localeTags, locales } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -26,10 +27,11 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const t = await getDictionary(lang);
+  const description = offersSeveralModels ? t.meta.description : t.meta.descriptionDuoOnly;
   return {
     metadataBase: new URL(site.url),
     title: { default: t.meta.title, template: `%s – ${site.name}` },
-    description: t.meta.description,
+    description,
     applicationName: site.name,
     alternates: {
       canonical: href("home", lang),
@@ -40,7 +42,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[lang]">): Prom
       siteName: site.name,
       locale: localeTags[lang].replace("-", "_"),
       title: t.meta.title,
-      description: t.meta.description,
+      description,
     },
     // Not public yet: keep search engines out until launch.
     robots: { index: false, follow: false },

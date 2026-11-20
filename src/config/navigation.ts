@@ -1,3 +1,4 @@
+import { isProductEnabled } from "@/catalog/availability";
 import { features } from "@/config/site";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
@@ -11,7 +12,7 @@ export function getMainNav(locale: Locale, t: Dictionary): { primary: NavItem[];
   const primary: NavItem[] = [
     { label: t.nav.configure, href: href("configure", locale) },
     { label: t.nav.duo, href: href("collection", locale, "duo") },
-    { label: t.nav.quartetSlim, href: href("collection", locale, "quartet-slim") },
+    ...(isProductEnabled("quartet-slim") ? [{ label: t.nav.quartetSlim, href: href("collection", locale, "quartet-slim") }] : []),
     ...(features.readyMadeDesigns ? [{ label: t.nav.designs, href: href("designs", locale) }] : []),
   ];
   const secondary: NavItem[] = [
@@ -33,7 +34,7 @@ export function getFooterNav(locale: Locale, t: Dictionary): NavGroup[] {
       items: [
         { label: t.nav.configure, href: href("configure", locale) },
         { label: t.nav.duo, href: href("collection", locale, "duo") },
-        { label: t.nav.quartetSlim, href: href("collection", locale, "quartet-slim") },
+        ...(isProductEnabled("quartet-slim") ? [{ label: t.nav.quartetSlim, href: href("collection", locale, "quartet-slim") }] : []),
         ...(features.readyMadeDesigns ? [{ label: t.nav.designs, href: href("designs", locale) }] : []),
       ],
     },

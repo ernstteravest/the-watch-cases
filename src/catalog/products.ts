@@ -18,7 +18,12 @@ import type { ProductSlug } from "./slugs";
 
 export type { ProductSlug };
 
-export type ProductImage = { src: StaticImageData; alt: Record<Locale, string> };
+export type ProductImage = {
+  src: StaticImageData;
+  alt: Record<Locale, string>;
+  /** The photo also shows this other model: only used while that model is on offer. */
+  alsoShows?: ProductSlug;
+};
 
 export type Product = {
   slug: ProductSlug;
@@ -66,7 +71,7 @@ export const products: readonly Product[] = [
           en: "A closed navy Duo watch box on a wooden desk",
         },
       },
-      { src: together, alt: togetherAlt },
+      { src: together, alt: togetherAlt, alsoShows: "quartet-slim" },
     ],
   },
   {
@@ -92,7 +97,7 @@ export const products: readonly Product[] = [
           en: "A closed black Quartet Slim watch box on a light oak table",
         },
       },
-      { src: together, alt: togetherAlt },
+      { src: together, alt: togetherAlt, alsoShows: "duo" },
     ],
   },
 ];

@@ -93,4 +93,11 @@ describe("quoteOrder", () => {
     const result = quoteOrder(catalog, prices, [{ configuration: duo(), quantity: 1, logo: file }], shipping);
     expect(result.ok && result.quote.lines[0].logo).toBeNull();
   });
+
+  it("refuses a model that is switched off", () => {
+    const quartet = defaultConfiguration(catalog, "quartet-slim");
+    expect(
+      quoteOrder(catalog, prices, [{ configuration: quartet, quantity: 1 }], shipping, (id) => id === "duo"),
+    ).toEqual({ ok: false, error: { code: "PRODUCT_UNAVAILABLE", line: 0, product: "quartet-slim" } });
+  });
 });

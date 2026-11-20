@@ -1,3 +1,4 @@
+import { offersSeveralModels } from "@/catalog/availability";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { Reveal } from "@/components/motion/reveal";
 import { TextLink } from "@/components/ui/text-link";
@@ -14,7 +15,9 @@ export function Intro({ t }: { t: Dictionary }) {
         </h2>
       </Reveal>
       <Reveal delay={0.1} className="flex flex-[1.2_1_420px] flex-col gap-5">
-        <p className="text-[17px] leading-[1.65] text-body md:text-lead">{i.text}</p>
+        <p className="text-[17px] leading-[1.65] text-body md:text-lead">
+          {offersSeveralModels ? i.text : i.textDuoOnly}
+        </p>
         <TextLink href="#duo">{i.link}</TextLink>
       </Reveal>
     </section>

@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/server";
+import { isProductEnabled } from "./availability";
 import { products as staticProducts, type Product, type ProductSlug } from "./products";
 
 type Commercial = { priceFromCents: number | null; active: boolean };
@@ -27,14 +28,20 @@ async function getCommercialData(): Promise<Partial<Record<ProductSlug, Commerci
   ) as Partial<Record<ProductSlug, Commercial>>;
 }
 
-/** All active products, with prices from the database where available. */
+/**
+ * All products on offer, with prices from the database where available.
+ * Models switched off in config/site.ts (features) or in the database are left
+ * out, and photos showing a switched-off model are dropped from galleries.
+ */
 export async function getProducts(): Promise<Product[]> {
   const commercial = await getCommercialData();
   const hasDbData = Object.keys(commercial).length > 0;
   return staticProducts
+    .filter((p) => isProductEnabled(p.slug))
     .map((p) => {
       const row = commercial[p.slug];
-      return row ? { ...p, priceFromCents: row.priceFromCents } : p;
+      const images = p.images.filter((img) => !img.alsoShows || isProductEnabled(img.alsoShows));
+      return row ? { ...p, images, priceFromCents: row.priceFromCents } : { ...p, images };
     })
     // The public key only returns active products, so "missing" means "switched off".
     .filter((p) => !hasDbData || (p.slug in commercial && commercial[p.slug]?.active !== false));
