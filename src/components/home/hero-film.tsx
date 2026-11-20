@@ -65,7 +65,7 @@ export function HeroFilm({ desktopSrc, mobileSrc, poster, labels }: HeroFilmProp
         onClick={toggle}
         aria-label={playing ? labels.pause : labels.play}
         aria-pressed={!playing}
-        className="absolute top-4 right-[var(--spacing-gutter)] z-10 md:top-auto md:bottom-6 grid size-10 cursor-pointer place-items-center rounded-pill border border-paper/40 text-paper/90 backdrop-blur-sm transition-colors hover:border-paper hover:text-paper"
+        className="absolute top-4 right-[var(--spacing-gutter)] z-10 grid size-10 cursor-pointer place-items-center rounded-pill border border-paper/40 text-paper/90 backdrop-blur-sm transition-colors hover:border-paper hover:text-paper"
       >
         {playing ? (
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
