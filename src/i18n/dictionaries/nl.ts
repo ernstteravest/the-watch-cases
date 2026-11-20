@@ -59,7 +59,7 @@ const nl = {
       titleLine2: "uw collectie",
       primary: "Ontwerp uw horlogebox",
       secondary: "Bekijk de collectie",
-      filmLabel: "Film: de Duo en de Quartet Slim op een notenhouten bureau",
+      filmLabel: "Film: een navy Duo horlogebox gaat open op een houten tafel",
       pause: "Film pauzeren",
       play: "Film afspelen",
     },
