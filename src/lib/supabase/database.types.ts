@@ -56,7 +56,17 @@ export type OrderRow = {
   payment_reference: string | null;
   paid_at: string | null;
   notes: string | null;
+  requires_logo_review: boolean;
+  logo_approved_at: string | null;
+  logo_review_note: string | null;
   created_at: string;
+  updated_at: string;
+};
+
+export type ShippingRateRow = {
+  country: "NL" | "BE" | "DE";
+  price_cents: number | null;
+  active: boolean;
   updated_at: string;
 };
 
@@ -71,6 +81,8 @@ export type OrderItemRow = {
   configuration: Json;
   engraving_text: string | null;
   design_url: string | null;
+  logo_original_path: string | null;
+  logo_preview_path: string | null;
   created_at: string;
 };
 
@@ -100,13 +112,28 @@ export type Database = {
           OrderRow,
           "customer_id" | "locale" | "subtotal_cents" | "total_cents" | "shipping_country" | "shipping_address"
         > &
-          Partial<Pick<OrderRow, "shipping_cents" | "discount_cents" | "tax_cents" | "billing_address" | "payment_provider" | "payment_reference" | "notes" | "status">>
+          Partial<
+            Pick<
+              OrderRow,
+              | "shipping_cents"
+              | "discount_cents"
+              | "tax_cents"
+              | "billing_address"
+              | "payment_provider"
+              | "payment_reference"
+              | "notes"
+              | "status"
+              | "requires_logo_review"
+              | "logo_approved_at"
+            >
+          >
       >;
       order_items: Table<
         OrderItemRow,
-        Omit<OrderItemRow, "id" | "created_at" | "engraving_text" | "design_url"> &
-          Partial<Pick<OrderItemRow, "engraving_text" | "design_url">>
+        Omit<OrderItemRow, "id" | "created_at" | "engraving_text" | "design_url" | "logo_original_path" | "logo_preview_path"> &
+          Partial<Pick<OrderItemRow, "engraving_text" | "design_url" | "logo_original_path" | "logo_preview_path">>
       >;
+      shipping_rates: Table<ShippingRateRow, Pick<ShippingRateRow, "country"> & Partial<Omit<ShippingRateRow, "country">>>;
       newsletter_subscribers: Table<
         NewsletterSubscriberRow,
         Pick<NewsletterSubscriberRow, "email" | "locale"> & Partial<Pick<NewsletterSubscriberRow, "source">>
