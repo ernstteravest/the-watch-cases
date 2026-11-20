@@ -47,6 +47,60 @@ const views: Names = {
 
 const surfaces: Names = { exterior: { nl: "Buitenkant", en: "Exterior" }, interior: { nl: "Binnenkant", en: "Interior" } };
 
+/** One-colour logo prints. The catalog labels are Dutch (zilver, wit, zwart, goud). */
+const logoColors: Names = {
+  zilver: { nl: "zilver", en: "silver" },
+  wit: { nl: "wit", en: "white" },
+  zwart: { nl: "zwart", en: "black" },
+  goud: { nl: "goud", en: "gold" },
+};
+
+/** Dutch logo messages by code; English uses the configurator's own wording. */
+function dutchLogoIssue(issue: Issue): string | null {
+  const file = issue.message.match(/“([^”]+)”/)?.[1];
+  const name = file ? `“${file}”` : "Het bestand";
+  const rest = issue.message.replace(/“[^”]*”/g, "");
+  const nums = rest.match(/\d+(?:[.,]\d+)?/g) ?? [];
+  switch (issue.code) {
+    case "logo_empty":
+      return /looks empty/.test(issue.message)
+        ? `We vonden geen logo in ${name}: de afbeelding lijkt leeg. Controleer of u het juiste bestand koos.`
+        : `${name} is leeg. Kies uw logobestand opnieuw.`;
+    case "logo_file_too_large":
+      return `${name} is ${nums[0] ?? "te"} MB. Gebruik een bestand van maximaal ${nums[1] ?? "10"} MB.`;
+    case "logo_unsupported_format":
+      return `${name} kan niet worden gebruikt. Upload uw logo als PNG-, JPG- of SVG-bestand.`;
+    case "logo_no_size":
+      return /SVG/.test(issue.message)
+        ? `${name} heeft geen afmetingen. Sla de SVG op met een breedte en hoogte, of een viewBox.`
+        : `${name} bevat geen afbeelding.`;
+    case "logo_too_small": {
+      const dims = rest.match(/(\d+) × (\d+)/);
+      const minPx = rest.match(/at least (\d+)/)?.[1] ?? "500";
+      const size = dims ? `${dims[1]} × ${dims[2]} pixels, ` : "";
+      return `Het logo in ${name} is ${size}te klein om scherp te drukken. Gebruik een grotere versie (minstens ${minPx} pixels breed of hoog), of een SVG.`;
+    }
+    case "logo_read_failed":
+      return `We konden ${name} niet lezen. Probeer het opnieuw te uploaden.`;
+    case "logo_decode_failed":
+      return `${name} kon niet als afbeelding worden geopend. Misschien is het beschadigd; probeer het opnieuw te exporteren.`;
+    case "logo_too_detailed":
+      return `${name} is te gedetailleerd om hier voor te bereiden. Probeer een eenvoudigere versie van het logo, of een SVG.`;
+    case "logo_timeout":
+      return `Het lezen van ${name} duurde te lang. Probeer het opnieuw, of gebruik een kleiner bestand.`;
+    case "logo_paste_no_image":
+      return "Er staat geen afbeelding op het klembord. Kopieer de afbeelding van het logo zelf (geen link of bestandsnaam), of kies het bestand.";
+    case "logo_missing":
+      return "Upload uw logo, of kies Geen logo.";
+    case "logo_invalid_artwork":
+      return "De afbeelding van het logo is beschadigd. Upload het opnieuw.";
+    case "logo_color_required":
+      return "Kies een kleur voor het logo.";
+    default:
+      return null;
+  }
+}
+
 export function createLabels(catalog: Catalog, locale: Locale) {
   const pick = (table: Names, id: string, fallback: string) => table[id]?.[locale] ?? fallback;
 
@@ -81,7 +135,24 @@ export function createLabels(catalog: Catalog, locale: Locale) {
     }
   };
 
-  return { color, material, piece, view, surface, match, personalizationIssue };
+  const logoColor = (id: string) => pick(logoColors, id, catalog.logo.colors.find((c) => c.id === id)?.label ?? id);
+
+  /** Customer-facing message for a logo upload or choice problem. */
+  const logoIssue = (issue: Issue): string => (locale === "nl" ? (dutchLogoIssue(issue) ?? issue.message) : issue.message);
+
+  /** "a", "a en b", "a, b en c" (and/en by language). */
+  const list = (items: string[]) =>
+    items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} ${locale === "nl" ? "en" : "and"} ${items[items.length - 1]}`;
+
+  /** Fixed pieces that always take the interior colour, e.g. "lipje en drukknoop". */
+  const interiorFollowers = () =>
+    list(
+      catalog.pieces
+        .filter((p) => !p.selectable && p.default.color === "match:interior")
+        .map((p) => piece(p.id).toLowerCase()),
+    );
+
+  return { color, material, piece, view, surface, match, personalizationIssue, logoColor, logoIssue, interiorFollowers };
 }
 
 export type Labels = ReturnType<typeof createLabels>;

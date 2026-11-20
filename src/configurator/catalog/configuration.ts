@@ -2,6 +2,7 @@
  * Customer configuration: defaults, validation against the catalog, and
  * resolution of "match:" colour tokens into concrete materials.
  */
+import { validateLogo } from "./logo";
 import { validatePersonalization } from "./personalization";
 import {
   configurationSchema,
@@ -26,9 +27,12 @@ export const defaultConfiguration = (catalog: Catalog, productId = catalog.defau
   product: productId,
   exterior: catalog.exterior.default,
   interior: catalog.interior.default,
-  pieces: Object.fromEntries(catalog.pieces.map((p) => [p.id, { ...p.default }])),
   personalization: { text: "", placement: catalog.personalization.defaultPlacement },
 });
+
+/** Every leather piece at its catalog default (pieces are not customer choices). */
+export const defaultPieces = (catalog: Catalog): Record<string, PieceChoice> =>
+  Object.fromEntries(catalog.pieces.map((p) => [p.id, { ...p.default }]));
 
 export const viewFromPreset = (catalog: Catalog, presetId: string): ViewState => {
   const preset = catalog.presentation.views.find((v) => v.id === presetId) ?? catalog.presentation.views[0];
@@ -71,26 +75,28 @@ const resolvedMaterial = (catalog: Catalog, materialId: string, colorId: string)
   };
 };
 
+interface MatchContext {
+  exterior: string;
+  interior: string;
+  pieces: Record<string, PieceChoice>;
+}
+
 /** Follows match tokens until a concrete colour id is found. */
-const resolveColorId = (
-  configuration: Configuration,
-  start: string,
-  pieceId: string,
-): { ok: true; colorId: string } | { ok: false; issue: Issue } => {
+const resolveColorId = (context: MatchContext, start: string, pieceId: string): { ok: true; colorId: string } | { ok: false; issue: Issue } => {
   const chain = [pieceId];
   let token = start;
   for (let guard = 0; guard < 32; guard++) {
     if (!token.startsWith(MATCH_PREFIX)) return { ok: true, colorId: token };
     const target = token.slice(MATCH_PREFIX.length);
-    if (target === "exterior") return { ok: true, colorId: configuration.exterior };
-    if (target === "interior") return { ok: true, colorId: configuration.interior };
+    if (target === "exterior") return { ok: true, colorId: context.exterior };
+    if (target === "interior") return { ok: true, colorId: context.interior };
     if (chain.includes(target)) {
       return {
         ok: false,
         issue: { path: `pieces.${pieceId}.color`, code: "match_cycle", message: `Circular colour match: ${[...chain, target].join(" → ")}.` },
       };
     }
-    const next = configuration.pieces[target];
+    const next = context.pieces[target];
     if (!next) {
       return {
         ok: false,
@@ -111,12 +117,23 @@ export interface ValidConfiguration {
   appearance: ResolvedAppearance;
 }
 
+export interface ValidationOptions {
+  /** Final render or order (not the live preview): a chosen logo must have been uploaded. */
+  final?: boolean;
+}
+
 /**
- * Validates a configuration against the catalog. Missing pieces are filled
- * with their catalog defaults (so saved configurations survive catalog
- * additions); unknown pieces, colours or materials are errors.
+ * Validates a configuration against the catalog and resolves its materials.
+ * Leather pieces always use their catalog defaults; a configuration may still
+ * list them (saved before the Leather details step was removed), but only with
+ * those defaults. Unknown pieces, colours or materials are errors.
  */
-export const validateConfiguration = (catalog: Catalog, input: unknown, path = "configuration"): Result<ValidConfiguration> => {
+export const validateConfiguration = (
+  catalog: Catalog,
+  input: unknown,
+  path = "configuration",
+  options: ValidationOptions = {},
+): Result<ValidConfiguration> => {
   const parsed = configurationSchema.safeParse(input);
   if (!parsed.success) return { ok: false, issues: zodIssues(parsed.error, path) };
 
@@ -133,20 +150,15 @@ export const validateConfiguration = (catalog: Catalog, input: unknown, path = "
     add("interior", "color_not_offered", `Interior colour "${raw.interior}" is not offered.`);
   }
 
-  const pieces: Record<string, PieceChoice> = {};
-  for (const id of Object.keys(raw.pieces)) {
-    if (!catalog.pieces.some((p) => p.id === id)) add(`pieces.${id}`, "unknown_piece", `Unknown leather piece "${id}".`);
-  }
-  for (const piece of catalog.pieces) {
-    const choice = raw.pieces[piece.id] ?? piece.default;
-    pieces[piece.id] = { ...choice };
-    if (!piece.materials.includes(choice.material)) {
-      add(`pieces.${piece.id}.material`, "material_not_offered", `"${choice.material}" is not offered for ${piece.label.toLowerCase()}.`);
-    }
-    if (!choice.color.startsWith(MATCH_PREFIX) && !piece.colors.includes(choice.color)) {
-      add(`pieces.${piece.id}.color`, "color_not_offered", `"${choice.color}" is not offered for ${piece.label.toLowerCase()}.`);
+  for (const [id, requested] of Object.entries(raw.pieces ?? {})) {
+    const piece = catalog.pieces.find((p) => p.id === id);
+    if (!piece) {
+      add(`pieces.${id}`, "unknown_piece", `Unknown leather piece "${id}".`);
+    } else if (requested.material !== piece.default.material || requested.color !== piece.default.color) {
+      add(`pieces.${id}`, "piece_not_selectable", `The ${piece.label.toLowerCase()} can't be customised; it always uses its default.`);
     }
   }
+  const pieces = defaultPieces(catalog);
 
   const placement = raw.personalization.placement;
   if (!catalog.personalization.placements.some((p) => p.id === placement)) {
@@ -160,21 +172,25 @@ export const validateConfiguration = (catalog: Catalog, input: unknown, path = "
   );
   if (!personalization.ok) issues.push(...personalization.issues);
 
+  const logo = validateLogo(raw.logo, catalog.logo, `${path}.logo`, { requireArtwork: options.final });
+  if (!logo.ok) issues.push(...logo.issues);
+
   if (issues.length > 0 || !product) return { ok: false, issues };
 
   const configuration: Configuration = {
     product: raw.product,
     exterior: raw.exterior,
     interior: raw.interior,
-    pieces,
     personalization: { text: personalization.ok ? personalization.value : "", placement },
+    ...(logo.ok && logo.value ? { logo: logo.value } : {}),
   };
 
   // Resolve materials (match tokens may point at other pieces).
+  const matchContext: MatchContext = { exterior: configuration.exterior, interior: configuration.interior, pieces };
   const resolvedPieces: Record<string, ResolvedMaterial> = {};
   for (const piece of catalog.pieces) {
     const choice = pieces[piece.id];
-    const colorId = resolveColorId(configuration, choice.color, piece.id);
+    const colorId = resolveColorId(matchContext, choice.color, piece.id);
     if (!colorId.ok) {
       issues.push({ ...colorId.issue, path: `${path}.${colorId.issue.path}` });
       continue;
@@ -202,10 +218,10 @@ export interface ValidRenderProps extends ValidConfiguration {
 }
 
 /** Validates the full composition input (configuration + camera view). */
-export const validateRenderProps = (catalog: Catalog, input: unknown): Result<ValidRenderProps> => {
+export const validateRenderProps = (catalog: Catalog, input: unknown, options: ValidationOptions = {}): Result<ValidRenderProps> => {
   const parsed = renderPropsSchema.safeParse(input);
   if (!parsed.success) return { ok: false, issues: zodIssues(parsed.error) };
-  const config = validateConfiguration(catalog, parsed.data.configuration);
+  const config = validateConfiguration(catalog, parsed.data.configuration, "configuration", options);
   const issues: Issue[] = config.ok ? [] : [...config.issues];
 
   const { view } = parsed.data;
@@ -237,56 +253,6 @@ export class InvalidConfigurationError extends Error {
 /* ------------------------------------------------------------------ */
 /* UI helpers                                                          */
 /* ------------------------------------------------------------------ */
-
-export interface PieceColorChoice {
-  /** Value stored in the configuration: a colour id or a match token. */
-  value: string;
-  label: string;
-  /** Colour it currently resolves to (for the swatch). */
-  colorId: string;
-  hex: string;
-  isMatch: boolean;
-}
-
-const matchLabel = (catalog: Catalog, target: string) => {
-  if (target === "exterior" || target === "interior") return `Match ${target}`;
-  const piece = catalog.pieces.find((p) => p.id === target);
-  return `Match ${piece ? piece.label.toLowerCase() : target}`;
-};
-
-/**
- * Colour choices for a leather piece: the match tokens that currently resolve to
- * an offered colour, followed by the piece's own palette.
- */
-export const pieceColorChoices = (catalog: Catalog, configuration: Configuration, pieceId: string): PieceColorChoice[] => {
-  const piece = catalog.pieces.find((p) => p.id === pieceId);
-  if (!piece) return [];
-  const material = configuration.pieces[pieceId]?.material ?? piece.default.material;
-  const tone = (colorId: string) => {
-    const color = catalog.colors.find((c) => c.id === colorId);
-    return color?.tones?.[material] ?? color?.hex ?? "#000000";
-  };
-  const tokens = new Set<string>([`${MATCH_PREFIX}interior`, `${MATCH_PREFIX}exterior`]);
-  if (piece.default.color.startsWith(MATCH_PREFIX)) tokens.add(piece.default.color);
-  const choices: PieceColorChoice[] = [];
-  for (const token of tokens) {
-    const resolved = resolveColorId(configuration, token, pieceId);
-    if (resolved.ok && piece.colors.includes(resolved.colorId)) {
-      choices.push({
-        value: token,
-        label: matchLabel(catalog, token.slice(MATCH_PREFIX.length)),
-        colorId: resolved.colorId,
-        hex: tone(resolved.colorId),
-        isMatch: true,
-      });
-    }
-  }
-  for (const colorId of piece.colors) {
-    const color = catalog.colors.find((c) => c.id === colorId);
-    if (color) choices.push({ value: colorId, label: color.name, colorId, hex: tone(colorId), isMatch: false });
-  }
-  return choices;
-};
 
 /** Hex shown for a surface swatch (applies the surface material's tone). */
 export const surfaceSwatchHex = (catalog: Catalog, surface: "exterior" | "interior", colorId: string): string => {

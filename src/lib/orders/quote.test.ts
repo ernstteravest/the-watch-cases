@@ -65,4 +65,32 @@ describe("quoteOrder", () => {
     );
     expect(result.ok && result.quote.lines[0].unitPriceCents).toBe(37400);
   });
+
+  it("needs the logo file, keeps the image out of the order data and adds a logo surcharge", () => {
+    const withLogo = { ...duo(), logo: { mode: "full-color" as const, artwork: null } };
+    expect(quoteOrder(catalog, prices, [{ configuration: withLogo, quantity: 1 }], shipping)).toEqual({
+      ok: false,
+      error: { code: "LOGO_MISSING", line: 0 },
+    });
+
+    const file = { name: "acme.png", format: "png" as const, width: 800, height: 400 };
+    const result = quoteOrder(
+      catalog,
+      { ...prices, options: { "*": { "logo:full-color": 1500 } } },
+      [{ configuration: withLogo, quantity: 1, logo: file }],
+      shipping,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const line = result.quote.lines[0];
+    expect(line.unitPriceCents).toBe(36400);
+    expect(line.logo).toEqual(file);
+    expect(line.configuration.logo?.artwork).toEqual({ ...file, dataUrl: "" });
+  });
+
+  it("ignores a logo file when no logo was chosen", () => {
+    const file = { name: "acme.png", format: "png" as const, width: 800, height: 400 };
+    const result = quoteOrder(catalog, prices, [{ configuration: duo(), quantity: 1, logo: file }], shipping);
+    expect(result.ok && result.quote.lines[0].logo).toBeNull();
+  });
 });

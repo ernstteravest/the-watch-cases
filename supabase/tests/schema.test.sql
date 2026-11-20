@@ -67,4 +67,17 @@ begin
 end $$;
 reset role;
 
+-- ── Checkout migration (shipping rates, logo storage) ─────────────
+set role anon;
+do $$ begin
+  if (select count(*) from public.shipping_rates) <> 3 then raise exception 'anon should see 3 shipping rates'; end if;
+  if (select price_cents from public.shipping_rates where country = 'NL') <> 0 then raise exception 'NL shipping should be free'; end if;
+  begin update public.shipping_rates set price_cents = 0; raise exception 'FAIL: anon changed shipping';
+  exception when insufficient_privilege then null; end;
+end $$;
+reset role;
+do $$ begin
+  if not exists (select 1 from storage.buckets where id = 'order-logos' and not public) then raise exception 'private order-logos bucket missing'; end if;
+end $$;
+
 select 'ALL SCHEMA TESTS PASSED' as result;

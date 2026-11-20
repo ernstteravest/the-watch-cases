@@ -5,8 +5,8 @@
  * render both go through this function — see tests/sharedScene.test.tsx.
  */
 import type { ResolvedAppearance, ResolvedMaterial, ValidRenderProps } from "../catalog/configuration";
-import type { Catalog, Construction, PersonalizationRules, Presentation } from "../catalog/schema";
-import { computeBoxLayout, isEngravingPlacement, withEngravingArea, type BoxLayout, type EngravingAnchor } from "../geometry/layout";
+import type { Catalog, Construction, LogoChoice, LogoMode, PersonalizationRules, Presentation } from "../catalog/schema";
+import { computeBoxLayout, fitLogo, isEngravingPlacement, logoAnchor, withEngravingArea, type BoxLayout, type EngravingAnchor } from "../geometry/layout";
 import { computeCamera, type CameraSetup } from "./camera";
 import { darken } from "./materials/leatherMaterial";
 
@@ -19,6 +19,21 @@ export interface EngravingDescription {
   deboss: PersonalizationRules["deboss"];
 }
 
+export interface LogoDescription {
+  mode: LogoMode;
+  /** The logo image. null → a placeholder marking the print area (preview only; a final render requires the upload). */
+  artwork: { dataUrl: string; width: number; height: number } | null;
+  /** One colour: the ink (matte) or foil (metallic). null for full colour. */
+  ink: { hex: string; finish: "matte" | "metallic"; roughness: number } | null;
+  /** Surface roughness of the full-colour print. */
+  printRoughness: number;
+  /** Centre of the outside of the lid. */
+  anchor: EngravingAnchor;
+  /** Printed size: the logo fitted inside the product's logo area, aspect kept. */
+  widthCm: number;
+  heightCm: number;
+}
+
 export interface SceneDescription {
   productId: string;
   layout: BoxLayout;
@@ -28,6 +43,7 @@ export interface SceneDescription {
   tapeHex: string;
   hardware: Presentation["hardware"];
   engraving: EngravingDescription | null;
+  logo: LogoDescription | null;
   environment: Presentation["environment"];
   background: Presentation["background"];
   camera: CameraSetup;
@@ -56,6 +72,29 @@ export const layoutFor = (catalog: Catalog, productId: string): BoxLayout => {
   return layout;
 };
 
+/** Where the logo goes on a product: the middle of the outside of the lid, with the product's logo area. */
+export const logoAnchorFor = (catalog: Catalog, productId: string): EngravingAnchor => {
+  const product = catalog.products.find((p) => p.id === productId);
+  if (!product) throw new Error(`Unknown product "${productId}"`);
+  return logoAnchor(layoutFor(catalog, productId), product.logo);
+};
+
+export const describeLogoPrint = (catalog: Catalog, productId: string, logo: LogoChoice | undefined): LogoDescription | null => {
+  if (!logo) return null;
+  const anchor = logoAnchorFor(catalog, productId);
+  const artwork = logo.artwork ? { dataUrl: logo.artwork.dataUrl, width: logo.artwork.width, height: logo.artwork.height } : null;
+  const size = artwork ? fitLogo(anchor, artwork.width / artwork.height) : { widthCm: anchor.widthCm, heightCm: anchor.heightCm };
+  const color = logo.mode === "one-color" ? (catalog.logo.colors.find((c) => c.id === logo.color) ?? catalog.logo.colors[0]) : null;
+  return {
+    mode: logo.mode,
+    artwork,
+    ink: color ? { hex: color.hex, finish: color.finish, roughness: color.roughness } : null,
+    printRoughness: catalog.logo.print.roughness,
+    anchor,
+    ...size,
+  };
+};
+
 export const describeScene = (catalog: Catalog, valid: ValidRenderProps): SceneDescription => {
   const { configuration, appearance, view } = valid;
   const presentation = catalog.presentation;
@@ -81,6 +120,7 @@ export const describeScene = (catalog: Catalog, valid: ValidRenderProps): SceneD
       text.length > 0
         ? { text, anchor, material: engravingMaterial, font: catalog.personalization.font, deboss: catalog.personalization.deboss }
         : null,
+    logo: describeLogoPrint(catalog, configuration.product, configuration.logo),
     environment: presentation.environment,
     background: presentation.background,
     camera: computeCamera(layout, view, {

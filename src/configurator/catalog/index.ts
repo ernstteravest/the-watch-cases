@@ -22,4 +22,5 @@ export const getCatalog = (): Catalog => {
 export * from "./schema";
 export * from "./configuration";
 export * from "./personalization";
+export * from "./logo";
 export { CatalogValidationError, loadCatalog } from "./loadCatalog";

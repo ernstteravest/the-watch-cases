@@ -44,9 +44,9 @@ describe("options catalog validation (load time)", () => {
 
   it("rejects circular colour matches between pieces", () => {
     const raw = cloneOptions();
-    const strap = raw.pieces.find((p) => p.id === "strap");
-    if (!strap) throw new Error("strap missing");
-    strap.default.color = "match:snap-cap"; // snap-cap already matches the strap
+    const pocket = raw.pieces.find((p) => p.id === "pocket");
+    if (!pocket) throw new Error("pocket missing");
+    pocket.default.color = "match:flap"; // the flap already matches the pocket
     expect(codes(raw)).toContain("match_cycle");
   });
 

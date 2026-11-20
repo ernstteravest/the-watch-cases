@@ -80,6 +80,8 @@ export const productSchema = z.object({
     /** Optional per-product override of personalization.maxLength. */
     maxLength: z.number().int().positive().optional(),
   }),
+  /** Area in the middle of the outside of the lid that the logo is fitted into (aspect kept). */
+  logo: z.object({ widthCm: positive, heightCm: positive }),
 });
 
 /* ------------------------------------------------------------------ */
@@ -145,6 +147,13 @@ export const pieceSchema = z.object({
   materials: z.array(idSchema).min(1),
   colors: z.array(idSchema).min(1),
   default: z.object({ material: idSchema, color: z.string().min(1) }),
+  /**
+   * Pieces with `selectable: false` that follow the interior are named in the
+   * Interior step note ("The lid strap and snap cap follow this colour.").
+   * No piece can be customised by the customer (the Leather details step was
+   * removed): every piece always uses its default.
+   */
+  selectable: z.boolean().default(true),
 });
 
 /* ------------------------------------------------------------------ */
@@ -188,6 +197,64 @@ export const personalizationRulesSchema = z.object({
     /** Roughness multiplier inside the pressing (burnished = smoother). */
     roughnessFactor: z.number().min(0).max(2),
   }),
+});
+
+/* ------------------------------------------------------------------ */
+/* Exterior logo (corporate orders)                                    */
+/* ------------------------------------------------------------------ */
+
+/** How the logo is printed. The behaviour of each mode is built in; labels come from the catalog. */
+export const LOGO_MODES = ["full-color", "one-color"] as const;
+export type LogoMode = (typeof LOGO_MODES)[number];
+
+/** Upload formats the configurator can read. */
+export const LOGO_FORMATS = ["png", "jpeg", "svg"] as const;
+export type LogoFormat = (typeof LOGO_FORMATS)[number];
+
+/**
+ * Longest data URL accepted for the prepared logo image carried in the
+ * configuration (and so in every render request). The image is scaled down
+ * until it fits; the render endpoint's body limit is set above this.
+ */
+export const MAX_LOGO_DATA_URL_LENGTH = 3_000_000;
+
+/**
+ * The logo is printed as uploaded, in full colour or in one colour. Only a
+ * plain background around it is removed (in the browser, on upload), and the
+ * customer can keep it instead.
+ */
+export const logoRulesSchema = z.object({
+  enabled: z.boolean(),
+  label: z.string().min(1),
+  description: z.string().optional(),
+  modes: z
+    .array(z.object({ id: z.enum(LOGO_MODES), label: z.string().min(1), description: z.string().min(1) }))
+    .min(1),
+  /** One-colour prints. */
+  colors: z
+    .array(
+      z.object({
+        id: idSchema,
+        /** Shown to the customer exactly as written. */
+        label: z.string().min(1),
+        hex: hexSchema,
+        /** metallic = foil print (silver, gold); matte = ink. */
+        finish: z.enum(["matte", "metallic"]),
+        roughness: unit,
+      }),
+    )
+    .min(1),
+  defaultColor: idSchema,
+  upload: z.object({
+    formats: z.array(z.enum(LOGO_FORMATS)).min(1),
+    maxFileSizeMb: positive,
+    /** PNG/JPG: the logo (once its background is removed) must have this many pixels on its longer side to print sharply. */
+    minLongestSidePx: z.number().int().positive(),
+    /** Longest side of the prepared image used for the preview and the render. */
+    previewMaxPx: z.number().int().min(256).max(4096),
+  }),
+  /** Surface of the full-colour print. */
+  print: z.object({ roughness: unit }),
 });
 
 /* ------------------------------------------------------------------ */
@@ -270,6 +337,8 @@ export const presentationSchema = z.object({
   defaultView: idSchema,
   /** View the preview turns to when the customer starts typing a personalization. */
   personalizationView: idSchema,
+  /** View the preview turns to when the customer adds a logo (the outside of the lid must show). */
+  logoView: idSchema,
   camera: z.object({
     fov: z.number().min(10).max(60),
     framingMargin: z.number().min(0).max(0.5),
@@ -290,6 +359,7 @@ export const catalogSchema = z.object({
   interior: surfaceSchema,
   pieces: z.array(pieceSchema),
   personalization: personalizationRulesSchema,
+  logo: logoRulesSchema,
   construction: constructionSchema,
   presentation: presentationSchema,
 });
@@ -304,6 +374,8 @@ export type Finish = z.output<typeof finishSchema>;
 export type Surface = z.output<typeof surfaceSchema>;
 export type Piece = z.output<typeof pieceSchema>;
 export type PersonalizationRules = z.output<typeof personalizationRulesSchema>;
+export type LogoRules = z.output<typeof logoRulesSchema>;
+export type LogoColor = LogoRules["colors"][number];
 export type Construction = z.output<typeof constructionSchema>;
 export type Presentation = z.output<typeof presentationSchema>;
 export type ViewPreset = Presentation["views"][number];
@@ -321,11 +393,37 @@ export const configurationSchema = z.object({
   product: z.string(),
   exterior: z.string(),
   interior: z.string(),
-  pieces: z.record(z.string(), pieceChoiceSchema),
+  /**
+   * Leather piece choices, from configurations saved while the Leather details
+   * step existed. Accepted only when each equals the piece's default; dropped
+   * on validation. New configurations leave it out.
+   */
+  pieces: z.record(z.string(), pieceChoiceSchema).optional(),
   personalization: z.object({
     text: z.string().max(200),
     placement: z.string(),
   }),
+  /** Exterior logo. Left out when there is no logo. */
+  logo: z
+    .object({
+      mode: z.enum(LOGO_MODES),
+      /** One-colour print colour id (logo.colors); one-colour mode only. */
+      color: z.string().optional(),
+      /** The prepared logo; null while the customer hasn't uploaded one yet. */
+      artwork: z
+        .object({
+          /** File name as uploaded or pasted (shown in the summary). */
+          name: z.string().min(1).max(255),
+          /** Format of the uploaded file. */
+          format: z.enum(LOGO_FORMATS),
+          /** The logo as uploaded (with its background removed if the customer chose so), as a PNG. */
+          dataUrl: z.string().max(MAX_LOGO_DATA_URL_LENGTH),
+          width: z.number().int().positive(),
+          height: z.number().int().positive(),
+        })
+        .nullable(),
+    })
+    .optional(),
 });
 
 export const viewStateSchema = z.object({
@@ -343,6 +441,8 @@ export const renderPropsSchema = z.object({
 
 export type PieceChoice = z.output<typeof pieceChoiceSchema>;
 export type Configuration = z.output<typeof configurationSchema>;
+export type LogoChoice = NonNullable<Configuration["logo"]>;
+export type LogoArtwork = NonNullable<LogoChoice["artwork"]>;
 export type ViewState = z.output<typeof viewStateSchema>;
 export type RenderProps = z.output<typeof renderPropsSchema>;
 

@@ -5,15 +5,14 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
 import { href } from "@/i18n/routes";
 import { Logo } from "@/components/brand/logo";
-import { BagIcon, PinIcon } from "@/components/ui/icons";
+import { PinIcon } from "@/components/ui/icons";
+import { CartLink } from "./cart-link";
 import { LanguageSwitch } from "./language-switch";
 import { MainMenu } from "./main-menu";
 
 /** Menu icon left, wordmark centred, language / Amsterdam / bag right. */
 export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary }) {
   const nav = getMainNav(locale, t);
-  // The cart is built in Stage 7; until then the bag shows 0 items.
-  const bagLabel = t.a11y.bagMany.replace("{count}", "0");
 
   return (
     <header className="relative z-20 bg-paper">
@@ -38,9 +37,7 @@ export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary }) {
           >
             <PinIcon />
           </Link>
-          <Link href={href("cart", locale)} aria-label={bagLabel} className="grid size-11 place-items-center hover:text-accent">
-            <BagIcon />
-          </Link>
+          <CartLink href={href("cart", locale)} labelOne={t.a11y.bagOne} labelMany={t.a11y.bagMany} />
         </div>
       </div>
     </header>

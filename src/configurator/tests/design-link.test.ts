@@ -4,29 +4,14 @@ import { decodeDesign, encodeDesign } from "../design-link";
 import { catalog } from "./helpers";
 
 describe("design link", () => {
-  it("round-trips a customised design", () => {
-    const configuration = {
-      ...defaultConfiguration(catalog, "quartet-slim"),
-      exterior: "black",
-      interior: "red",
-    };
-    configuration.pieces = { ...configuration.pieces, strap: { material: "full-grain", color: "cognac" } };
+  it("round-trips a design", () => {
+    const configuration = { ...defaultConfiguration(catalog, "quartet-slim"), exterior: "black", interior: "red" };
     const params = encodeDesign(catalog, { configuration, name: " A.V. " });
 
-    expect(params.get("model")).toBe("quartet-slim");
-    expect(params.get("pieces")).toBe("strap.full-grain.cognac");
-    expect(params.get("name")).toBe("A.V.");
-
+    expect(params.toString()).toBe("model=quartet-slim&ext=black&int=red&name=A.V.");
     const decoded = decodeDesign(catalog, params);
     expect(decoded.configuration).toEqual(configuration);
     expect(decoded.name).toBe("A.V.");
-  });
-
-  it("keeps match tokens such as match:interior", () => {
-    const configuration = defaultConfiguration(catalog, "duo");
-    configuration.pieces = { ...configuration.pieces, cushions: { material: "nappa", color: "match:exterior" } };
-    const decoded = decodeDesign(catalog, encodeDesign(catalog, { configuration, name: "" }));
-    expect(decoded.configuration.pieces.cushions).toEqual({ material: "nappa", color: "match:exterior" });
   });
 
   it("only selects the model when coming from a product page", () => {
@@ -34,15 +19,21 @@ describe("design link", () => {
     expect(decoded.configuration).toEqual(defaultConfiguration(catalog, "quartet-slim"));
   });
 
-  it("falls back to defaults for unknown models, colours and pieces", () => {
-    const decoded = decodeDesign(
-      catalog,
-      new URLSearchParams("model=octo&ext=purple&int=beige&pieces=strap.suede.gold,unknown.x.y"),
-    );
+  it("opens old links that still list leather pieces", () => {
+    const decoded = decodeDesign(catalog, new URLSearchParams("model=duo&ext=cognac&int=beige&pieces=strap.full-grain.cognac"));
+    expect(decoded.configuration).toEqual({ ...defaultConfiguration(catalog, "duo"), exterior: "cognac", interior: "beige" });
+  });
+
+  it("falls back to defaults for unknown models and colours", () => {
+    const decoded = decodeDesign(catalog, new URLSearchParams("model=octo&ext=purple&int=beige"));
     const base = defaultConfiguration(catalog, catalog.defaultProduct);
     expect(decoded.configuration.product).toBe(catalog.defaultProduct);
     expect(decoded.configuration.exterior).toBe(base.exterior);
     expect(decoded.configuration.interior).toBe("beige");
-    expect(decoded.configuration.pieces).toEqual(base.pieces);
+  });
+
+  it("maps the old brand colour ids to the default", () => {
+    const decoded = decodeDesign(catalog, new URLSearchParams("model=duo&ext=rolex-green"));
+    expect(decoded.configuration.exterior).toBe(defaultConfiguration(catalog, "duo").exterior);
   });
 });

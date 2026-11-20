@@ -11,17 +11,20 @@ import type { PriceList, Quote } from "./quote";
 
 export type Address = {
   name: string;
+  /** Billing only: company name and VAT number for business orders. */
+  company?: string;
+  vatNumber?: string;
   line1: string;
   line2?: string;
   postalCode: string;
   city: string;
-  country: "NL" | "BE" | "DE";
+  country: string;
 };
 
 export type NewOrder = {
   customer: { email: string; firstName: string; lastName: string; phone?: string };
   locale: Locale;
-  shippingAddress: Address;
+  shippingAddress: Address & { country: "NL" | "BE" | "DE" };
   billingAddress?: Address;
   quote: Quote;
   designUrls?: string[];
@@ -47,12 +50,26 @@ export async function loadPriceList(db: Db): Promise<PriceList> {
   };
 }
 
+export type LogoUploadPaths = { line: number; original: string; preview: string };
+
+const EXTENSIONS = { png: "png", jpeg: "jpg", svg: "svg" } as const;
+
+/** Storage paths for a line's logo files in the order-logos bucket. */
+export function logoPaths(orderId: string, line: number, format: keyof typeof EXTENSIONS): { original: string; preview: string } {
+  const base = `${orderId}/line-${line + 1}`;
+  return { original: `${base}-original.${EXTENSIONS[format]}`, preview: `${base}-preview.png` };
+}
+
 /**
  * Saves a new order as "pending_payment": customer (matched by e-mail),
- * order and its items. Returns the order id and number (e.g. TWC-2026-0001).
- * If saving the items fails, the half-created order is removed again.
+ * order and its items. Orders with a logo are flagged for a manual check.
+ * Returns the order id and number (e.g. TWC-2026-0001) and where the logo
+ * files must be uploaded. If saving the items fails, the order is removed again.
  */
-export async function createPendingOrder(db: Db, order: NewOrder): Promise<{ id: string; orderNumber: string }> {
+export async function createPendingOrder(
+  db: Db,
+  order: NewOrder,
+): Promise<{ id: string; orderNumber: string; logoUploads: LogoUploadPaths[] }> {
   const email = order.customer.email.trim().toLowerCase();
   const { data: customer, error: customerError } = await db
     .from("customers")
@@ -81,11 +98,15 @@ export async function createPendingOrder(db: Db, order: NewOrder): Promise<{ id:
       shipping_country: order.shippingAddress.country,
       shipping_address: order.shippingAddress as unknown as Json,
       billing_address: (order.billingAddress ?? null) as unknown as Json,
+      requires_logo_review: quote.lines.some((l) => l.logo),
     })
     .select("id, order_number")
     .single();
   if (orderError) throw new Error(`Could not save order: ${orderError.message}`);
 
+  const logoUploads: LogoUploadPaths[] = quote.lines.flatMap((line, i) =>
+    line.logo ? [{ line: i, ...logoPaths(created.id, i, line.logo.format) }] : [],
+  );
   const { error: itemsError } = await db.from("order_items").insert(
     quote.lines.map((line, i) => ({
       order_id: created.id,
@@ -97,13 +118,15 @@ export async function createPendingOrder(db: Db, order: NewOrder): Promise<{ id:
       configuration: line.configuration as unknown as Json,
       engraving_text: line.engravingText,
       design_url: order.designUrls?.[i] ?? null,
+      logo_original_path: logoUploads.find((u) => u.line === i)?.original ?? null,
+      logo_preview_path: logoUploads.find((u) => u.line === i)?.preview ?? null,
     })),
   );
   if (itemsError) {
     await db.from("orders").delete().eq("id", created.id);
     throw new Error(`Could not save order items: ${itemsError.message}`);
   }
-  return { id: created.id, orderNumber: created.order_number };
+  return { id: created.id, orderNumber: created.order_number, logoUploads };
 }
 
 /** Links the payment session (e.g. Stripe Checkout) to the order. */
@@ -130,4 +153,51 @@ export async function markOrderPaid(db: Db, paymentReference: string): Promise<{
     .maybeSingle();
   if (error) throw new Error(`Could not mark order paid: ${error.message}`);
   return data ? { orderNumber: data.order_number } : null;
+}
+
+/** Everything the confirmation e-mail needs, for an order found by its payment reference. */
+export async function getOrderForConfirmation(db: Db, paymentReference: string) {
+  const { data, error } = await db
+    .from("orders")
+    .select(
+      "id, order_number, locale, shipping_cents, total_cents, requires_logo_review, customers(email, first_name), order_items(product_name, quantity, line_total_cents, configuration)",
+    )
+    .eq("payment_reference", paymentReference)
+    .maybeSingle();
+  if (error) throw new Error(`Could not load order: ${error.message}`);
+  return data as unknown as {
+    id: string;
+    order_number: string;
+    locale: Locale;
+    shipping_cents: number;
+    total_cents: number;
+    requires_logo_review: boolean;
+    customers: { email: string; first_name: string | null } | null;
+    order_items: { product_name: string; quantity: number; line_total_cents: number; configuration: Json }[];
+  } | null;
+}
+
+/** Lines and amounts of a pending order, to start the payment with. */
+export async function getPendingOrderForPayment(db: Db, orderId: string) {
+  const { data, error } = await db
+    .from("orders")
+    .select("id, order_number, locale, status, shipping_cents, customers(email), order_items(product_name, quantity, unit_price_cents, logo_original_path, logo_preview_path)")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (error) throw new Error(`Could not load order: ${error.message}`);
+  return data as unknown as {
+    id: string;
+    order_number: string;
+    locale: Locale;
+    status: OrderStatus;
+    shipping_cents: number;
+    customers: { email: string } | null;
+    order_items: {
+      product_name: string;
+      quantity: number;
+      unit_price_cents: number;
+      logo_original_path: string | null;
+      logo_preview_path: string | null;
+    }[];
+  } | null;
 }

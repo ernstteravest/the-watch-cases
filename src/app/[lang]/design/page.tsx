@@ -4,6 +4,7 @@ import { getProducts } from "@/catalog/catalog-data";
 import { isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { formatPrice } from "@/lib/format";
+import { href } from "@/i18n/routes";
 import { pageMetadata } from "@/lib/page-metadata";
 import { ConfiguratorLoader } from "@/components/configurator/configurator-loader";
 
@@ -35,7 +36,12 @@ export default async function DesignPage({ params }: PageProps<"/[lang]/design">
       <noscript>
         <p className="container-page py-section text-body">{t.configurator.webglHelp}</p>
       </noscript>
-      <ConfiguratorLoader locale={lang} t={t.configurator} modelMeta={modelMeta} />
+      <ConfiguratorLoader
+        locale={lang}
+        t={t.configurator}
+        modelMeta={modelMeta}
+        cart={{ texts: t.cart, href: href("cart", lang) }}
+      />
     </>
   );
 }
