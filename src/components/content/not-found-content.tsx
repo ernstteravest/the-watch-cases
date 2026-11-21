@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/i18n/config";
 import { parsePublicPath } from "@/i18n/routes";

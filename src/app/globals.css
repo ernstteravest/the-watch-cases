@@ -129,6 +129,24 @@
   }
 }
 
+/* Fade-up on scroll (components/motion/reveal.tsx). Hidden only once
+   JavaScript runs (the .js class), so content is never lost without it. */
+.js .reveal:not([data-shown]) {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal {
+  transition:
+    opacity 0.7s var(--ease-out-soft),
+    transform 0.7s var(--ease-out-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal:not([data-shown]) {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @utility container-page {
   width: 100%;
   max-width: var(--container-page);

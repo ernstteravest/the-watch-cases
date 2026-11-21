@@ -12,6 +12,7 @@ const nl = {
   },
   a11y: {
     skipToContent: "Naar de inhoud",
+    announcements: "Mededelingen",
     home: "The Watch Cases Amsterdam, home",
     openMenu: "Menu openen",
     closeMenu: "Menu sluiten",
@@ -83,7 +84,7 @@ const nl = {
       link: "Vind uw box",
     },
     subnav: {
-      label: "Horlogeboxen",
+      label: "Op deze pagina",
       all: "Alles",
       cta: "Ontwerp de uwe",
     },
@@ -217,7 +218,7 @@ const nl = {
     emailUs: "Mail ons",
     configure: {
       title: "Ontwerp uw horlogebox",
-      intro: "Hier komt de configurator: kies het model, het leer, de voering, de kussens en uw naam, en draai de box rond om uw eigen exemplaar te zien.",
+      intro: "Ontwerp uw eigen leren horlogebox: kies het leer, de voering en uw naam in het deksel, en draai de box rond om uw eigen exemplaar te zien.",
     },
     howItsMade: {
       title: "Zo wordt het gemaakt",

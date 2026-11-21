@@ -23,7 +23,7 @@ import { layoutFor, logoAnchorFor } from "@/configurator/scene/describeScene";
 import type { SceneEvent, SceneStatusApi } from "@/configurator/scene/SceneStatus";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { addToCart, type CartLogo } from "@/lib/cart/cart";
 import { Button } from "@/components/ui/button";
 import { describeDesign } from "./describe";
@@ -273,7 +273,10 @@ function Configurator({ catalog, locale, t, modelMeta, cart }: Props & { catalog
 
       <aside aria-label={t.panelLabel} className="flex flex-col border-line bg-paper lg:min-h-0 lg:border-l">
         <div className="flex-1 px-[var(--spacing-gutter)] pt-6 pb-4 lg:overflow-y-auto lg:px-8 lg:pt-8">
-          <h1 className="mb-6 text-h3 font-bold">{t.title}</h1>
+          {/* The page's h1 is rendered by the server (design/page.tsx); this is its visual twin. */}
+          <p aria-hidden="true" className="mb-6 text-h3 font-bold">
+            {t.title}
+          </p>
           <OptionsPanel
             catalog={catalog}
             configuration={configuration}

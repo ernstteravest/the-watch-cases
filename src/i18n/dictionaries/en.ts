@@ -10,6 +10,7 @@ const en: Dictionary = {
   },
   a11y: {
     skipToContent: "Skip to content",
+    announcements: "Announcements",
     home: "The Watch Cases Amsterdam, home",
     openMenu: "Open menu",
     closeMenu: "Close menu",
@@ -81,7 +82,7 @@ const en: Dictionary = {
       link: "Find your box",
     },
     subnav: {
-      label: "Watch boxes",
+      label: "On this page",
       all: "All",
       cta: "Design yours",
     },
@@ -215,7 +216,7 @@ const en: Dictionary = {
     emailUs: "Email us",
     configure: {
       title: "Design your watch box",
-      intro: "The configurator goes here: choose the model, leather, lining, cushions and your name, and turn the box to see your own one.",
+      intro: "Design your own leather watch box: choose the leather, the lining and the name in the lid, and turn the box to see your own one.",
     },
     howItsMade: {
       title: "How it’s made",

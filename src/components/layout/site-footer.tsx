@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { getFooterNav, getLegalNav } from "@/config/navigation";
 import { features, site } from "@/config/site";
 import type { Locale } from "@/i18n/config";

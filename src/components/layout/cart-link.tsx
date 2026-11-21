@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { cartCount } from "@/lib/cart/cart";
 import { useCart } from "@/lib/cart/use-cart";
 import { BagIcon } from "@/components/ui/icons";
