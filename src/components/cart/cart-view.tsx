@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { catalogResult, surfaceSwatchHex } from "@/configurator/catalog";
 import { createLabels } from "@/configurator/labels";

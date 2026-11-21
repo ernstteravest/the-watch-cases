@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { getMainNav } from "@/config/navigation";
 import { site } from "@/config/site";
 import type { Locale } from "@/i18n/config";
@@ -25,8 +25,8 @@ export function SiteHeader({ locale, t }: { locale: Locale; t: Dictionary }) {
           footer={{ email: site.email, location: t.footer.location }}
           languageSwitch={<LanguageSwitch locale={locale} label={t.a11y.switchLanguage} className="-ms-3" />}
         />
-        <Link href={href("home", locale)} aria-label={t.a11y.home} className="text-ink hover:text-ink">
-          <Logo />
+        <Link href={href("home", locale)} className="text-ink hover:text-ink">
+          <Logo label={t.a11y.home} />
         </Link>
         <div className="flex items-center justify-self-end gap-1">
           <LanguageSwitch locale={locale} label={t.a11y.switchLanguage} className="hidden sm:grid" />

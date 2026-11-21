@@ -33,6 +33,7 @@ export default async function DesignPage({ params }: PageProps<"/[lang]/design">
 
   return (
     <>
+      <h1 className="sr-only">{t.configurator.title}</h1>
       <noscript>
         <p className="container-page py-section text-body">{t.configurator.webglHelp}</p>
       </noscript>

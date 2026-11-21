@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { getImageProps } from "next/image";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/nl";
@@ -18,10 +18,15 @@ export function Hero({ locale, t }: { locale: Locale; t: Dictionary }) {
   const { props: desktop } = getImageProps({ src: posterDesktop, alt: "", sizes: "100vw", preload: true });
   const { props: mobile } = getImageProps({ src: posterMobile, alt: "", sizes: "100vw", preload: true });
   const poster = (
+    <>
+      {/* Tell the browser about the still frame straight away (it's the largest element on screen). */}
+      <link rel="preload" as="image" imageSrcSet={desktop.srcSet} imageSizes="100vw" media="(min-width: 768px)" fetchPriority="high" />
+      <link rel="preload" as="image" imageSrcSet={mobile.srcSet} imageSizes="100vw" media="(max-width: 767px)" fetchPriority="high" />
     <picture>
       <source media="(min-width: 768px)" srcSet={desktop.srcSet} sizes="100vw" />
-      <img {...mobile} alt="" className="absolute inset-0 size-full object-cover" />
+      <img {...mobile} alt="" fetchPriority="high" className="absolute inset-0 size-full object-cover" />
     </picture>
+    </>
   );
 
   return (

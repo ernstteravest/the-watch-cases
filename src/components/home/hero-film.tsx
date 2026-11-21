@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "@/components/motion/use-reduced-motion";
 
 type HeroFilmProps = {
   /** 16:9 film for tablet and desktop. */

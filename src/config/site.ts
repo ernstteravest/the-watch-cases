@@ -28,6 +28,12 @@ export const site = {
   /** Warranty period in years. */
   warrantyYears: 1,
 
+  /**
+   * Search engines: blocked until launch. Set NEXT_PUBLIC_ALLOW_INDEXING=true
+   * on Vercel (Production only) when the site goes live; no code change needed.
+   */
+  allowIndexing: process.env.NEXT_PUBLIC_ALLOW_INDEXING === "true",
+
   /** Placeholder shown wherever a price is not decided yet. */
   pricePlaceholder: "€xxx.xx",
 

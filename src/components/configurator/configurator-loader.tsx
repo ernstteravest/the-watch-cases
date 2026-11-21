@@ -23,7 +23,7 @@ export function ConfiguratorLoader(props: Props) {
 function Loading() {
   const text = useContext(LoadingText);
   return (
-    <div className="grid h-[60vh] place-items-center bg-sand lg:h-[calc(100dvh-105px)]" role="status">
+    <div className="grid min-h-[calc(100dvh-105px)] place-items-center bg-sand lg:h-[calc(100dvh-105px)] lg:min-h-[640px]" role="status">
       <div className="flex flex-col items-center gap-4">
         <span className="size-8 animate-spin rounded-pill border-2 border-line-strong border-t-accent" aria-hidden="true" />
         <span className="text-[15px] text-muted">{text}</span>

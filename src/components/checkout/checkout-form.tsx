@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { useEffect, useId, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { placeOrder, quoteCheckout, startPayment, type PlaceOrderResult, type QuoteSummary } from "@/app/actions/checkout";
 import { catalogResult } from "@/configurator/catalog";

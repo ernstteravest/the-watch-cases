@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/link";
 import { useState, type ReactNode } from "react";
 import type { NavItem } from "@/config/navigation";
 import { Logo } from "@/components/brand/logo";
@@ -34,8 +34,8 @@ export function MainMenu({ primary, secondary, homeHref, labels, footer, languag
         <SheetTitle className="sr-only">{labels.title}</SheetTitle>
         <SheetDescription className="sr-only">{labels.title}</SheetDescription>
         <div className="flex h-[68px] items-center px-6">
-          <Link href={homeHref} onClick={close} aria-label={labels.home}>
-            <Logo />
+          <Link href={homeHref} onClick={close}>
+            <Logo label={labels.home} />
           </Link>
         </div>
         <nav aria-label={labels.title} className="flex flex-1 flex-col overflow-y-auto px-6 pt-6 pb-8">
