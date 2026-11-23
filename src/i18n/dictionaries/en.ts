@@ -67,7 +67,7 @@ const en: Dictionary = {
     reassurance: {
       label: "What is included",
       items: [
-        { title: "Engraving included", text: "Up to 12 characters on the Duo, 18 on the Quartet Slim", textDuoOnly: "Up to 12 characters, pressed into the lid" },
+        { title: "Engraving included", text: "Up to 15 characters on the Duo, 18 on the Quartet Slim", textDuoOnly: "Up to 15 characters, pressed into the lid" },
         { title: "Made after you order", text: "Made in 14 working days" },
         { title: "Shipping to NL, BE and DE", text: "The Netherlands, Belgium and Germany" },
         { title: "One-year warranty", text: "On stitching, zip and hardware" },

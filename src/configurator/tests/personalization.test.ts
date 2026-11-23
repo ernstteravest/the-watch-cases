@@ -17,14 +17,14 @@ describe("personalization rules", () => {
     expect(validatePersonalization("  A.  V. ", rules, duo)).toEqual({ ok: true, value: "A. V." });
   });
 
-  it("uses the per-product maximum length (Duo 12, Quartet Slim 18)", () => {
-    expect(effectiveMaxLength(rules, duo)).toBe(12);
+  it("uses the per-product maximum length (Duo 15, Quartet Slim 18)", () => {
+    expect(effectiveMaxLength(rules, duo)).toBe(15);
     expect(effectiveMaxLength(rules, quartet)).toBe(18);
-    expect(validatePersonalization("ABCDEFGHIJKL", rules, duo).ok).toBe(true);
-    const tooLong = validatePersonalization("ABCDEFGHIJKLM", rules, duo);
+    expect(validatePersonalization("ABCDEFGHIJKLMNO", rules, duo).ok).toBe(true);
+    const tooLong = validatePersonalization("ABCDEFGHIJKLMNOP", rules, duo);
     expect(tooLong.ok).toBe(false);
     if (!tooLong.ok) expect(tooLong.issues[0].code).toBe("too_long");
-    expect(validatePersonalization("ABCDEFGHIJKLM", rules, quartet).ok).toBe(true);
+    expect(validatePersonalization("ABCDEFGHIJKLMNOP", rules, quartet).ok).toBe(true);
   });
 
   it("allows accented Latin letters, digits and . & ' -", () => {

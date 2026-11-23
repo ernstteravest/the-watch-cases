@@ -69,7 +69,7 @@ const nl = {
     reassurance: {
       label: "Wat u krijgt",
       items: [
-        { title: "Gravering inbegrepen", text: "Tot 12 tekens op de Duo, 18 op de Quartet Slim", textDuoOnly: "Tot 12 tekens, in het deksel gedrukt" },
+        { title: "Gravering inbegrepen", text: "Tot 15 tekens op de Duo, 18 op de Quartet Slim", textDuoOnly: "Tot 15 tekens, in het deksel gedrukt" },
         { title: "Gemaakt na uw bestelling", text: "Productietijd 14 werkdagen" },
         { title: "Verzending in NL, BE en DE", text: "Nederland, België en Duitsland" },
         { title: "Eén jaar garantie", text: "Op stiksels, rits en beslag" },

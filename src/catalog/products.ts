@@ -53,7 +53,7 @@ export const products: readonly Product[] = [
     name: "Duo",
     capacity: 2,
     priceFromCents: null,
-    engravingMaxLength: 12,
+    engravingMaxLength: 15,
     dimensions: { length: 16, depth: 9, height: 7.5 },
     bandFocus: { mobile: "88% 50%", desktop: "72% 50%" },
     images: [

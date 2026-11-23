@@ -59,7 +59,7 @@ export const options = {
         maxWatchThickness: 1.2,
       },
       // Fitted area on the pocket front, centred below the snap (see README).
-      engraving: { widthCm: 9, heightCm: 1.8, maxLength: 12 },
+      engraving: { widthCm: 9, heightCm: 1.8, maxLength: 15 },
       // Middle of the outside of the lid; the logo is fitted inside, aspect kept.
       logo: { widthCm: 7, heightCm: 4 },
     },
@@ -204,7 +204,7 @@ export const options = {
   personalization: {
     enabled: true,
     minLength: 1,
-    maxLength: 12, // per-product overrides: products[].engraving.maxLength
+    maxLength: 15, // per-product overrides: products[].engraving.maxLength
     // Latin letters incl. accents, digits, space and . & ' ’ -
     allowedPattern: "^[A-Za-z0-9À-ÖØ-öø-ÿĀ-ž .&'’\\-]+$",
     allowedDescription: "Use letters (accents are fine), digits, spaces, full stops, ampersands, apostrophes and hyphens",
@@ -226,7 +226,7 @@ export const options = {
       letterSpacingEm: 0.14,
     },
     deboss: {
-      maxCapHeightCm: 0.8,
+      maxCapHeightCm: 0.65,
       depth: 4.5,
       darkening: 0.38,
       edgeSoftnessCm: 0.035,
