@@ -5,7 +5,7 @@ import { site } from "@/config/site";
 export default function robots(): MetadataRoute.Robots {
   if (!site.allowIndexing) return { rules: { userAgent: "*", disallow: "/" } };
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/winkelmand", "/afrekenen", "/en/cart", "/en/checkout"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/beheer", "/winkelmand", "/afrekenen", "/en/cart", "/en/checkout"] },
     sitemap: `${site.url}/sitemap.xml`,
   };
 }

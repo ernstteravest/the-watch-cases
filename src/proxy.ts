@@ -3,6 +3,8 @@ import { defaultLocale } from "@/i18n/config";
 import { parsePublicPath, translatePath } from "@/i18n/routes";
 import { isProductEnabled } from "@/catalog/availability";
 import { productSlugs } from "@/catalog/slugs";
+import { beheerProxy } from "@/lib/admin/proxy";
+import { isBeheerPath } from "@/lib/admin/session-rules";
 
 /** Internal path of a product page with an unknown slug → serve the 404 page. */
 function isUnknownProduct(internalPath: string): boolean {
@@ -33,9 +35,14 @@ function toCollection(request: NextRequest, locale: "nl" | "en") {
  *   /en/collection/duo → rewrite  /en/collection/duo   (English)
  *   /nl/…              → redirect to the unprefixed Dutch URL (one canonical URL)
  *   /design            → redirect /ontwerp (an English slug used without /en)
+ *   /beheer/…          → management environment (see lib/admin/proxy.ts)
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // The management environment has its own rules (login, MFA, strict CSP)
+  // and is never treated as a language page.
+  if (isBeheerPath(pathname)) return beheerProxy(request);
 
   if (pathname === "/nl" || pathname.startsWith("/nl/")) {
     const url = request.nextUrl.clone();

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import { supabasePublicEnv } from "./env";
 
 /**
  * Supabase connections for server code only.
@@ -10,11 +11,7 @@ import type { Database } from "./database.types";
  * The secret key never has a NEXT_PUBLIC_ prefix, so it can't reach a browser.
  */
 const env = {
-  url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL,
-  publicKey:
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
-    process.env.SUPABASE_ANON_KEY,
+  ...supabasePublicEnv,
   secretKey: process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY,
 };
 
